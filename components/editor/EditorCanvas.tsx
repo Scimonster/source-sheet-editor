@@ -1,8 +1,9 @@
 'use client';
 
 import { useSheetStore } from '@/lib/store';
-import { Section } from '@/lib/types';
+import { Section, ContentElement } from '@/lib/types';
 import { RecursiveSection } from './RecursiveSection';
+import { ContentElementRenderer } from './ContentElementRenderer';
 import { AddElementBar } from './AddElementBar';
 import { cn } from '@/lib/utils';
 import {
@@ -120,12 +121,16 @@ export function EditorCanvas() {
             <AddElementBar afterId={null} onAdd={addElement} />
           )}
 
-          {/* Content sections */}
-          {content.map((section, i) => (
-            <div key={section.id}>
-              <RecursiveSection section={section as Section} depth={0} sectionIndex={i} />
+          {/* Content items (sections and elements) */}
+          {content.map((item, i) => (
+            <div key={item.id}>
+              {item.type === 'section' ? (
+                <RecursiveSection section={item as Section} depth={0} sectionIndex={i} />
+              ) : (
+                <ContentElementRenderer element={item as ContentElement} />
+              )}
               {isEdit && (
-                <AddElementBar afterId={section.id} onAdd={addElement} />
+                <AddElementBar afterId={item.id} onAdd={addElement} />
               )}
             </div>
           ))}

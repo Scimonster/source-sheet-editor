@@ -63,8 +63,7 @@ export function RecursiveSection({ section, depth, sectionIndex = 0 }: Props) {
       <div
         className={cn(
           section.showBorder && 'border border-border rounded-md p-4',
-          !section.showBorder && 'pl-0',
-          depth > 0 && 'ml-4'
+          section.showBorder && depth > 0 && 'ml-4',
         )}
       >
         {/* Section title */}

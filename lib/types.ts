@@ -34,6 +34,12 @@ export interface SourceElement {
     primaryLanguage: 'en' | 'he';
     columnRatio?: string;
   };
+  titleDisplay?: {
+    languages: 'both' | 'he' | 'en';
+    justification?: 'left' | 'center' | 'right';
+    fontFamily?: string;
+    fontSize?: string;
+  };
   directionNote?: RichText;
   styles?: ElementStyles;
 }
@@ -97,7 +103,7 @@ export interface SourceSheet {
     collaborators: string[];
   };
   config: GlobalConfig;
-  content: Section[];
+  content: (Section | ContentElement)[];
 }
 
 export type ViewMode = 'edit' | 'preview' | 'leader';

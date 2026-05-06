@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useRef, useEffect } from 'react';
 import { SourceElement } from '@/lib/types';
 import { useSheetStore } from '@/lib/store';
 import { RichTextEditor } from './RichTextEditor';
@@ -9,27 +10,113 @@ interface Props {
   source: SourceElement;
 }
 
+/** Click-to-edit wrapper for a single language pane */
+function EditablePane({
+  html,
+  onChange,
+  rtl,
+  placeholder,
+  sourceId,
+  langKey,
+}: {
+  html: string;
+  onChange: (html: string) => void;
+  rtl: boolean;
+  placeholder: string;
+  sourceId: string;
+  langKey: string;
+}) {
+  const [editing, setEditing] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!editing) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setEditing(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [editing]);
+
+  const isEmpty = !html || html === '<p></p>' || html.trim() === '';
+
+  if (!editing) {
+    return (
+      <div
+        className={cn(
+          'cursor-text rounded transition-colors hover:bg-muted/40',
+          isEmpty && 'min-h-[2.5rem] flex items-center'
+        )}
+        dir={rtl ? 'rtl' : 'ltr'}
+        onClick={() => setEditing(true)}
+      >
+        {isEmpty ? (
+          <span className="text-muted-foreground/50 text-sm italic select-none">
+            {placeholder}
+          </span>
+        ) : (
+          <div
+            className="prose prose-sm max-w-none leading-relaxed"
+            style={{ textAlign: rtl ? 'right' : 'left' }}
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div ref={ref}>
+      <RichTextEditor
+        key={`${sourceId}-${langKey}`}
+        value={html}
+        onChange={onChange}
+        rtl={rtl}
+        placeholder={placeholder}
+        minHeight="4rem"
+      />
+    </div>
+  );
+}
+
 export function SourceRenderer({ source }: Props) {
   const { viewMode, updateElement, getSourceNumber, sheet } = useSheetStore();
   const isEdit = viewMode === 'edit';
   const showNumbers = sheet.config.showSourceNumbers;
 
   const sourceNum = getSourceNumber(source.id);
-  const { ref, content, displayOptions, directionNote } = source;
+  const { ref, content, displayOptions, directionNote, titleDisplay } = source;
 
   // Reference header
   const hasLink = ref.link && ref.link.trim() !== '';
   const refHe = ref.he;
   const refEn = ref.en;
+  const titleLangs = titleDisplay?.languages ?? 'both';
+  const showHeRef = titleLangs === 'both' || titleLangs === 'he';
+  const showEnRef = titleLangs === 'both' || titleLangs === 'en';
+
+  const refStyle: React.CSSProperties = {
+    justifyContent: titleDisplay?.justification === 'center' ? 'center'
+      : titleDisplay?.justification === 'right' ? 'flex-end'
+      : titleDisplay?.justification === 'left' ? 'flex-start'
+      : undefined,
+    fontFamily: titleDisplay?.fontFamily,
+    fontSize: titleDisplay?.fontSize,
+  };
 
   const refDisplay = (
-    <div className="flex flex-wrap items-center gap-2 mb-3 pb-1.5 border-b border-border/60">
+    <div
+      className="flex flex-wrap items-center gap-2 mb-3 pb-1.5 border-b border-border/60"
+      style={refStyle}
+    >
       {showNumbers && (
         <span className="text-xs font-semibold text-muted-foreground bg-muted rounded px-1.5 py-0.5 font-sans tabular-nums">
           {sourceNum}.
         </span>
       )}
-      {refHe && (
+      {showHeRef && refHe && (
         <span
           className={cn(
             'font-serif font-semibold text-base text-foreground',
@@ -41,7 +128,7 @@ export function SourceRenderer({ source }: Props) {
           {refHe}
         </span>
       )}
-      {refEn && (
+      {showEnRef && refEn && (
         <span
           className={cn(
             'font-serif text-sm text-muted-foreground',
@@ -72,9 +159,8 @@ export function SourceRenderer({ source }: Props) {
   const secondaryRatioPct = 100 - primaryRatioPct;
 
   const heContent = isEdit ? (
-    <RichTextEditor
-      key={`${source.id}-he`}
-      value={content.he.text}
+    <EditablePane
+      html={content.he.text}
       onChange={(html) =>
         updateElement(source.id, {
           content: { ...content, he: { ...content.he, text: html } },
@@ -82,20 +168,21 @@ export function SourceRenderer({ source }: Props) {
       }
       rtl
       placeholder="Hebrew text…"
-      minHeight="4rem"
+      sourceId={source.id}
+      langKey="he"
     />
   ) : (
     <div
       className="prose prose-sm max-w-none leading-relaxed"
       dir="rtl"
+      style={{ textAlign: 'right' }}
       dangerouslySetInnerHTML={{ __html: content.he.text }}
     />
   );
 
   const enContent = isEdit ? (
-    <RichTextEditor
-      key={`${source.id}-en`}
-      value={content.en.text}
+    <EditablePane
+      html={content.en.text}
       onChange={(html) =>
         updateElement(source.id, {
           content: { ...content, en: { ...content.en, text: html } },
@@ -103,11 +190,13 @@ export function SourceRenderer({ source }: Props) {
       }
       rtl={false}
       placeholder="English translation…"
-      minHeight="4rem"
+      sourceId={source.id}
+      langKey="en"
     />
   ) : (
     <div
       className="prose prose-sm max-w-none leading-relaxed"
+      style={{ textAlign: 'left' }}
       dangerouslySetInnerHTML={{ __html: content.en.text }}
     />
   );

@@ -62,6 +62,28 @@ function findParentList(
   return null;
 }
 
+/** Find the parent section that contains a given id, plus the grandparent list and index */
+function findParentSection(
+  nodes: (Section | ContentElement)[],
+  id: string,
+  parentList?: (Section | ContentElement)[],
+  parentIndex?: number
+): { parentSection: Section; grandparentList: (Section | ContentElement)[]; grandparentIndex: number } | null {
+  for (let i = 0; i < nodes.length; i++) {
+    if (nodes[i].type === 'section') {
+      const sec = nodes[i] as Section;
+      for (let j = 0; j < sec.children.length; j++) {
+        if (sec.children[j].id === id) {
+          return { parentSection: sec, grandparentList: nodes, grandparentIndex: i };
+        }
+      }
+      const found = findParentSection(sec.children, id, nodes, i);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
 /** Count sources in a flat list for numbering */
 function countSourcesBefore(
   allContent: (Section | ContentElement)[],
@@ -112,6 +134,7 @@ interface SheetState {
   // Move
   moveUp: (id: string) => void;
   moveDown: (id: string) => void;
+  unnestElement: (id: string) => void;
 
   // Drag & drop – move a node to a new position
   moveNode: (dragId: string, overId: string, position: 'before' | 'after' | 'inside') => void;
@@ -144,15 +167,15 @@ export const useSheetStore = create<SheetState>()(
 
       addElement: (afterId, element) => {
         set((s) => {
-          const content = cloneNode(s.sheet.content) as Section[];
+          const content = cloneNode(s.sheet.content) as (Section | ContentElement)[];
           if (afterId === null) {
-            content.push(element as Section);
+            content.push(element);
           } else {
             const found = findParentList(content, afterId);
             if (found) {
               found.list.splice(found.index + 1, 0, element);
             } else {
-              content.push(element as Section);
+              content.push(element);
             }
           }
           return { sheet: { ...s.sheet, content } };
@@ -167,7 +190,7 @@ export const useSheetStore = create<SheetState>()(
               if (node.id !== id) return node;
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               return { ...(node as any), ...(updates as any) } as Section | ContentElement;
-            }) as Section[],
+            }) as (Section | ContentElement)[],
           },
         }));
       },
@@ -178,14 +201,14 @@ export const useSheetStore = create<SheetState>()(
             ...s.sheet,
             content: mapNodes(s.sheet.content, (node) =>
               node.id === id ? null : node
-            ) as Section[],
+            ) as (Section | ContentElement)[],
           },
         }));
       },
 
       duplicateElement: (id) => {
         set((s) => {
-          const content = cloneNode(s.sheet.content) as Section[];
+          const content = cloneNode(s.sheet.content) as (Section | ContentElement)[];
           const found = findParentList(content, id);
           if (!found) return s;
           const clone = cloneNode(found.list[found.index]);
@@ -205,7 +228,7 @@ export const useSheetStore = create<SheetState>()(
 
       moveUp: (id) => {
         set((s) => {
-          const content = cloneNode(s.sheet.content) as Section[];
+          const content = cloneNode(s.sheet.content) as (Section | ContentElement)[];
           const found = findParentList(content, id);
           if (!found || found.index === 0) return s;
           const [item] = found.list.splice(found.index, 1);
@@ -216,7 +239,7 @@ export const useSheetStore = create<SheetState>()(
 
       moveDown: (id) => {
         set((s) => {
-          const content = cloneNode(s.sheet.content) as Section[];
+          const content = cloneNode(s.sheet.content) as (Section | ContentElement)[];
           const found = findParentList(content, id);
           if (!found || found.index >= found.list.length - 1) return s;
           const [item] = found.list.splice(found.index, 1);
@@ -225,10 +248,26 @@ export const useSheetStore = create<SheetState>()(
         });
       },
 
+      unnestElement: (id) => {
+        set((s) => {
+          const content = cloneNode(s.sheet.content) as (Section | ContentElement)[];
+          const parentInfo = findParentSection(content, id);
+          if (!parentInfo) return s; // already at root
+          const { parentSection, grandparentList, grandparentIndex } = parentInfo;
+          // Remove from parent section
+          const childIndex = parentSection.children.findIndex((c) => c.id === id);
+          if (childIndex === -1) return s;
+          const [element] = parentSection.children.splice(childIndex, 1);
+          // Insert after the parent section in the grandparent list
+          grandparentList.splice(grandparentIndex + 1, 0, element);
+          return { sheet: { ...s.sheet, content: content as (Section | ContentElement)[] } };
+        });
+      },
+
       moveNode: (dragId, overId, position) => {
         set((s) => {
           if (dragId === overId) return s;
-          const content = cloneNode(s.sheet.content) as Section[];
+          const content = cloneNode(s.sheet.content) as (Section | ContentElement)[];
 
           // Extract the dragged node
           const fromFound = findParentList(content, dragId);

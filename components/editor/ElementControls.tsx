@@ -16,6 +16,7 @@ import {
   ChevronDown,
   Settings2,
   GripVertical,
+  Outdent,
 } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -29,7 +30,7 @@ interface Props {
 }
 
 export function ElementControls({ node, onConfigure, children, className }: Props) {
-  const { deleteElement, duplicateElement, moveUp, moveDown, viewMode } =
+  const { deleteElement, duplicateElement, moveUp, moveDown, unnestElement, viewMode } =
     useSheetStore();
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
@@ -55,7 +56,7 @@ export function ElementControls({ node, onConfigure, children, className }: Prop
         {/* Hover action strip */}
         <div
           className={cn(
-            'absolute -left-9 top-1/2 -translate-y-1/2 flex flex-col gap-0.5',
+            'absolute -left-9 top-1 flex flex-col gap-0.5',
             'opacity-0 group-hover:opacity-100 transition-opacity z-10'
           )}
         >
@@ -99,12 +100,25 @@ export function ElementControls({ node, onConfigure, children, className }: Prop
             </TooltipTrigger>
             <TooltipContent side="left">Move down</TooltipContent>
           </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => unnestElement(node.id)}
+                className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground"
+                aria-label="Move out of section"
+              >
+                <Outdent className="size-3.5" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="left">Move out of section</TooltipContent>
+          </Tooltip>
         </div>
 
         {/* Right-side action strip */}
         <div
           className={cn(
-            'absolute -right-20 top-1/2 -translate-y-1/2 flex items-center gap-0.5',
+            'absolute -right-20 top-1 flex items-center gap-0.5',
             'opacity-0 group-hover:opacity-100 transition-opacity z-10'
           )}
         >

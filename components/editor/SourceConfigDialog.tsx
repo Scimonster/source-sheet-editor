@@ -148,6 +148,113 @@ export function SourceConfigDialog({ source, open, onOpenChange }: Props) {
 
           <Separator />
 
+          {/* Title Display */}
+          <section className="space-y-3">
+            <h3 className="text-sm font-semibold">Title Display</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label>Languages</Label>
+                <Select
+                  value={source.titleDisplay?.languages ?? 'both'}
+                  onValueChange={(v) =>
+                    update({
+                      titleDisplay: {
+                        ...(source.titleDisplay ?? { languages: 'both' }),
+                        languages: v as 'both' | 'he' | 'en',
+                      },
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="both">Both</SelectItem>
+                    <SelectItem value="he">Hebrew only</SelectItem>
+                    <SelectItem value="en">English only</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label>Alignment</Label>
+                <Select
+                  value={source.titleDisplay?.justification ?? 'inherit'}
+                  onValueChange={(v) =>
+                    update({
+                      titleDisplay: {
+                        ...(source.titleDisplay ?? { languages: 'both' }),
+                        justification: v === 'inherit' ? undefined : (v as 'left' | 'center' | 'right'),
+                      },
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Inherit" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="inherit">Inherit</SelectItem>
+                    <SelectItem value="left">Left</SelectItem>
+                    <SelectItem value="center">Center</SelectItem>
+                    <SelectItem value="right">Right</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label>Font</Label>
+                <Select
+                  value={source.titleDisplay?.fontFamily ?? 'inherit'}
+                  onValueChange={(v) =>
+                    update({
+                      titleDisplay: {
+                        ...(source.titleDisplay ?? { languages: 'both' }),
+                        fontFamily: v === 'inherit' ? undefined : v,
+                      },
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Inherit" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="inherit">Inherit</SelectItem>
+                    <SelectItem value="Times New Roman">Times New Roman</SelectItem>
+                    <SelectItem value="Arial">Arial</SelectItem>
+                    <SelectItem value="Georgia">Georgia</SelectItem>
+                    <SelectItem value="David">David</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label>Font size</Label>
+                <Select
+                  value={source.titleDisplay?.fontSize ?? 'inherit'}
+                  onValueChange={(v) =>
+                    update({
+                      titleDisplay: {
+                        ...(source.titleDisplay ?? { languages: 'both' }),
+                        fontSize: v === 'inherit' ? undefined : v,
+                      },
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Inherit" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="inherit">Inherit</SelectItem>
+                    <SelectItem value="10pt">10pt</SelectItem>
+                    <SelectItem value="12pt">12pt</SelectItem>
+                    <SelectItem value="14pt">14pt</SelectItem>
+                    <SelectItem value="16pt">16pt</SelectItem>
+                    <SelectItem value="18pt">18pt</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </section>
+
+          <Separator />
+
           {/* Direction note */}
           <section className="space-y-2">
             <h3 className="text-sm font-semibold">Direction note (leader only)</h3>
