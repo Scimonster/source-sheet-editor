@@ -17,6 +17,19 @@ export interface SourceContent {
   license?: LicenseInfo;
 }
 
+export interface SourceDisplayOptions {
+  layout?: 'side-by-side' | 'stacked' | 'single';
+  primaryLanguage?: 'en' | 'he';
+  columnRatio?: string;
+}
+
+export interface TitleDisplayOptions {
+  languages?: 'both' | 'he' | 'en';
+  justification?: 'left' | 'center' | 'right';
+  fontFamily?: string;
+  fontSize?: string;
+}
+
 export interface SourceElement {
   id: string;
   type: 'source';
@@ -34,12 +47,7 @@ export interface SourceElement {
     primaryLanguage: 'en' | 'he';
     columnRatio?: string;
   };
-  titleDisplay?: {
-    languages: 'both' | 'he' | 'en';
-    justification?: 'left' | 'center' | 'right';
-    fontFamily?: string;
-    fontSize?: string;
-  };
+  titleDisplay?: TitleDisplayOptions;
   directionNote?: RichText;
   styles?: ElementStyles;
 }
@@ -67,6 +75,30 @@ export interface DirectionElement {
 
 export type ContentElement = SourceElement | TextElement | DirectionElement;
 
+/** Style class name — used for per-class defaults */
+export type StyleClassName =
+  | 'sectionHeader'
+  | 'source'
+  | 'text'
+  | 'hebrew'
+  | 'english'
+  | 'sourceTitle'
+  | string;  // user-defined classes
+
+/**
+ * Style overrides that can be set at the section level.
+ * Each key maps to element styles for that category.
+ */
+export interface SectionStyleOverrides {
+  source?: Partial<ElementStyles>;
+  text?: Partial<ElementStyles>;
+  hebrew?: Partial<ElementStyles>;
+  english?: Partial<ElementStyles>;
+  sectionHeader?: Partial<ElementStyles>;
+  sourceTitle?: Partial<ElementStyles>;
+  [className: string]: Partial<ElementStyles> | undefined;
+}
+
 export interface Section {
   id: string;
   type: 'section';
@@ -74,6 +106,17 @@ export interface Section {
   showBorder: boolean;
   styles?: ElementStyles;
   children: (Section | ContentElement)[];
+  /** Override styles for child elements by class/category */
+  styleOverrides?: SectionStyleOverrides;
+  /** Override default source display options for sources in this section */
+  sourceDefaults?: SourceDisplayOptions;
+  /** Override default source title display for sources in this section */
+  titleDefaults?: TitleDisplayOptions;
+}
+
+/** Per-class style defaults stored at the global level */
+export interface ClassStyleDefaults {
+  [className: string]: ElementStyles;
 }
 
 export interface GlobalConfig {
@@ -85,6 +128,12 @@ export interface GlobalConfig {
     right: number;
   };
   defaultStyles: ElementStyles;
+  /** Per-class style defaults (e.g. sectionHeader, source, text, hebrew, english, sourceTitle) */
+  classDefaults?: ClassStyleDefaults;
+  /** Default source display options (layout, language, column ratio) */
+  sourceDefaults?: SourceDisplayOptions;
+  /** Default source title display */
+  titleDefaults?: TitleDisplayOptions;
   showSectionNumbers: boolean;
   showSourceNumbers: boolean;
 }

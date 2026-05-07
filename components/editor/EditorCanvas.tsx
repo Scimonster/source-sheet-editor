@@ -125,9 +125,17 @@ export function EditorCanvas() {
           {content.map((item, i) => (
             <div key={item.id}>
               {item.type === 'section' ? (
-                <RecursiveSection section={item as Section} depth={0} sectionIndex={i} />
+                <RecursiveSection
+                  section={item as Section}
+                  depth={0}
+                  sectionIndex={i}
+                  ancestorSections={[]}
+                />
               ) : (
-                <ContentElementRenderer element={item as ContentElement} />
+                <ContentElementRenderer
+                  element={item as ContentElement}
+                  ancestorSections={[]}
+                />
               )}
               {isEdit && (
                 <AddElementBar afterId={item.id} onAdd={addElement} />

@@ -1,13 +1,19 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { SourceElement } from '@/lib/types';
+import { SourceElement, Section } from '@/lib/types';
 import { useSheetStore } from '@/lib/store';
 import { RichTextEditor } from './RichTextEditor';
 import { cn } from '@/lib/utils';
+import {
+  resolveStyles,
+  resolveSourceDisplayOptions,
+  resolveTitleDisplay,
+} from '@/lib/resolve-styles';
 
 interface Props {
   source: SourceElement;
+  ancestorSections: Section[];
 }
 
 /** Click-to-edit wrapper for a single language pane */
@@ -81,29 +87,38 @@ function EditablePane({
   );
 }
 
-export function SourceRenderer({ source }: Props) {
+export function SourceRenderer({ source, ancestorSections }: Props) {
   const { viewMode, updateElement, getSourceNumber, sheet } = useSheetStore();
   const isEdit = viewMode === 'edit';
   const showNumbers = sheet.config.showSourceNumbers;
+  const config = sheet.config;
 
   const sourceNum = getSourceNumber(source.id);
-  const { ref, content, displayOptions, directionNote, titleDisplay } = source;
+  const { ref, content, directionNote } = source;
 
-  // Reference header
+  // ─── Resolved cascading config ──────────────────────────────────────
+  const resolvedStyles = resolveStyles(source, ancestorSections, config);
+  const resolvedDisplay = resolveSourceDisplayOptions(source, ancestorSections, config);
+  const resolvedTitle = resolveTitleDisplay(source, ancestorSections, config);
+  const resolvedHeStyles = resolveStyles(source, ancestorSections, config, 'hebrew');
+  const resolvedEnStyles = resolveStyles(source, ancestorSections, config, 'english');
+  const resolvedTitleStyles = resolveStyles(source, ancestorSections, config, 'sourceTitle');
+
+  // ─── Reference header ───────────────────────────────────────────────
   const hasLink = ref.link && ref.link.trim() !== '';
   const refHe = ref.he;
   const refEn = ref.en;
-  const titleLangs = titleDisplay?.languages ?? 'both';
+  const titleLangs = resolvedTitle.languages ?? 'both';
   const showHeRef = titleLangs === 'both' || titleLangs === 'he';
   const showEnRef = titleLangs === 'both' || titleLangs === 'en';
 
   const refStyle: React.CSSProperties = {
-    justifyContent: titleDisplay?.justification === 'center' ? 'center'
-      : titleDisplay?.justification === 'right' ? 'flex-end'
-      : titleDisplay?.justification === 'left' ? 'flex-start'
+    justifyContent: resolvedTitle.justification === 'center' ? 'center'
+      : resolvedTitle.justification === 'right' ? 'flex-end'
+      : resolvedTitle.justification === 'left' ? 'flex-start'
       : undefined,
-    fontFamily: titleDisplay?.fontFamily,
-    fontSize: titleDisplay?.fontSize,
+    fontFamily: resolvedTitle.fontFamily ?? resolvedTitleStyles.fontFamily,
+    fontSize: resolvedTitle.fontSize ?? resolvedTitleStyles.fontSize,
   };
 
   const refDisplay = (
@@ -152,51 +167,66 @@ export function SourceRenderer({ source }: Props) {
     )
   );
 
-  const layout = displayOptions.layout;
-  const primary = displayOptions.primaryLanguage;
-  // Parse column ratio: primary language column width
-  const primaryRatioPct = parseInt(displayOptions.columnRatio ?? '50') || 50;
+  const layout = resolvedDisplay.layout;
+  const primary = resolvedDisplay.primaryLanguage;
+  const primaryRatioPct = parseInt(resolvedDisplay.columnRatio ?? '50') || 50;
   const secondaryRatioPct = 100 - primaryRatioPct;
 
+  const heStyle: React.CSSProperties = {
+    fontFamily: resolvedHeStyles.fontFamily,
+    fontSize: resolvedHeStyles.fontSize,
+    textAlign: resolvedHeStyles.justification ?? 'right',
+  };
+
+  const enStyle: React.CSSProperties = {
+    fontFamily: resolvedEnStyles.fontFamily,
+    fontSize: resolvedEnStyles.fontSize,
+    textAlign: resolvedEnStyles.justification ?? 'left',
+  };
+
   const heContent = isEdit ? (
-    <EditablePane
-      html={content.he.text}
-      onChange={(html) =>
-        updateElement(source.id, {
-          content: { ...content, he: { ...content.he, text: html } },
-        })
-      }
-      rtl
-      placeholder="Hebrew text…"
-      sourceId={source.id}
-      langKey="he"
-    />
+    <div style={heStyle}>
+      <EditablePane
+        html={content.he.text}
+        onChange={(html) =>
+          updateElement(source.id, {
+            content: { ...content, he: { ...content.he, text: html } },
+          })
+        }
+        rtl
+        placeholder="Hebrew text…"
+        sourceId={source.id}
+        langKey="he"
+      />
+    </div>
   ) : (
     <div
       className="prose prose-sm max-w-none leading-relaxed"
       dir="rtl"
-      style={{ textAlign: 'right' }}
+      style={heStyle}
       dangerouslySetInnerHTML={{ __html: content.he.text }}
     />
   );
 
   const enContent = isEdit ? (
-    <EditablePane
-      html={content.en.text}
-      onChange={(html) =>
-        updateElement(source.id, {
-          content: { ...content, en: { ...content.en, text: html } },
-        })
-      }
-      rtl={false}
-      placeholder="English translation…"
-      sourceId={source.id}
-      langKey="en"
-    />
+    <div style={enStyle}>
+      <EditablePane
+        html={content.en.text}
+        onChange={(html) =>
+          updateElement(source.id, {
+            content: { ...content, en: { ...content.en, text: html } },
+          })
+        }
+        rtl={false}
+        placeholder="English translation…"
+        sourceId={source.id}
+        langKey="en"
+      />
+    </div>
   ) : (
     <div
       className="prose prose-sm max-w-none leading-relaxed"
-      style={{ textAlign: 'left' }}
+      style={enStyle}
       dangerouslySetInnerHTML={{ __html: content.en.text }}
     />
   );
@@ -205,14 +235,12 @@ export function SourceRenderer({ source }: Props) {
   const first = primary === 'he' ? heContent : enContent;
   const second = primary === 'he' ? enContent : heContent;
 
-  // Side-by-side: Hebrew always on right, English always on left,
-  // column widths determined by columnRatio (applied to the Hebrew column)
+  // Side-by-side: Hebrew always on right, English always on left
   const heWidth = `${primary === 'he' ? primaryRatioPct : secondaryRatioPct}%`;
   const enWidth = `${primary === 'he' ? secondaryRatioPct : primaryRatioPct}%`;
 
   const sourceBody =
     layout === 'side-by-side' ? (
-      // dir="rtl" puts Hebrew (rightmost) first visually
       <div className="flex gap-3" dir="rtl">
         <div className="flex-shrink-0" style={{ width: heWidth }}>
           {heContent}
@@ -234,11 +262,11 @@ export function SourceRenderer({ source }: Props) {
     <div
       className={cn(
         'source-element py-2',
-        source.styles?.justification && `text-${source.styles.justification}`
+        resolvedStyles.justification && `text-${resolvedStyles.justification}`
       )}
       style={{
-        fontFamily: source.styles?.fontFamily,
-        fontSize: source.styles?.fontSize,
+        fontFamily: resolvedStyles.fontFamily,
+        fontSize: resolvedStyles.fontSize,
       }}
     >
       {refDisplay}

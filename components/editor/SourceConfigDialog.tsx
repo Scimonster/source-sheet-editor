@@ -265,6 +265,32 @@ export function SourceConfigDialog({ source, open, onOpenChange }: Props) {
               minHeight="3rem"
             />
           </section>
+
+          <Separator />
+
+          {/* Custom classes */}
+          <section className="space-y-2">
+            <h3 className="text-sm font-semibold">Custom classes</h3>
+            <Input
+              value={(source.styles?.customClasses ?? []).join(', ')}
+              placeholder="e.g. featured, highlight"
+              onChange={(e) => {
+                const classes = e.target.value
+                  .split(',')
+                  .map((c) => c.trim())
+                  .filter(Boolean);
+                update({
+                  styles: {
+                    ...source.styles,
+                    customClasses: classes.length ? classes : undefined,
+                  },
+                });
+              }}
+            />
+            <p className="text-xs text-muted-foreground">
+              Comma-separated class names. Styles from matching global class defaults will be applied.
+            </p>
+          </section>
         </div>
       </DialogContent>
     </Dialog>

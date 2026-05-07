@@ -1,6 +1,7 @@
 'use client';
 
 import { useSheetStore } from '@/lib/store';
+import { ElementStyles } from '@/lib/types';
 import {
   Dialog,
   DialogContent,
@@ -18,19 +19,138 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
+/** Shared set of font options */
+const FONT_OPTIONS = [
+  { value: 'Times New Roman', label: 'Times New Roman' },
+  { value: 'Arial', label: 'Arial' },
+  { value: 'Georgia', label: 'Georgia' },
+  { value: 'David', label: 'David (Hebrew)' },
+  { value: 'Taamey Frank CLM', label: 'Taamey Frank CLM' },
+];
+
+const SIZE_OPTIONS = ['10pt', '11pt', '12pt', '13pt', '14pt', '16pt', '18pt'];
+
+const DEFAULT_CLASS_NAMES = [
+  { key: 'sectionHeader', label: 'Section Header' },
+  { key: 'source', label: 'Source' },
+  { key: 'text', label: 'Text' },
+  { key: 'hebrew', label: 'Hebrew' },
+  { key: 'english', label: 'English' },
+  { key: 'sourceTitle', label: 'Source Title' },
+] as const;
+
+/** Reusable style editor row for a single class */
+function ClassStyleRow({
+  label,
+  classKey,
+  styles,
+  onChange,
+}: {
+  label: string;
+  classKey: string;
+  styles: Partial<ElementStyles> | undefined;
+  onChange: (classKey: string, styles: Partial<ElementStyles>) => void;
+}) {
+  const update = (partial: Partial<ElementStyles>) => {
+    onChange(classKey, { ...styles, ...partial });
+  };
+
+  return (
+    <div className="space-y-2 py-3 border-b border-border/40 last:border-0">
+      <p className="text-sm font-medium text-foreground">{label}</p>
+      <div className="grid grid-cols-3 gap-2">
+        <div className="space-y-1">
+          <Label className="text-xs">Font</Label>
+          <Select
+            value={styles?.fontFamily ?? 'inherit'}
+            onValueChange={(v) => update({ fontFamily: v === 'inherit' ? undefined : v })}
+          >
+            <SelectTrigger className="h-8 text-xs">
+              <SelectValue placeholder="Inherit" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="inherit">Inherit</SelectItem>
+              {FONT_OPTIONS.map((f) => (
+                <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1">
+          <Label className="text-xs">Size</Label>
+          <Select
+            value={styles?.fontSize ?? 'inherit'}
+            onValueChange={(v) => update({ fontSize: v === 'inherit' ? undefined : v })}
+          >
+            <SelectTrigger className="h-8 text-xs">
+              <SelectValue placeholder="Inherit" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="inherit">Inherit</SelectItem>
+              {SIZE_OPTIONS.map((s) => (
+                <SelectItem key={s} value={s}>{s}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1">
+          <Label className="text-xs">Align</Label>
+          <Select
+            value={styles?.justification ?? 'inherit'}
+            onValueChange={(v) =>
+              update({
+                justification: v === 'inherit' ? undefined : (v as ElementStyles['justification']),
+              })
+            }
+          >
+            <SelectTrigger className="h-8 text-xs">
+              <SelectValue placeholder="Inherit" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="inherit">Inherit</SelectItem>
+              <SelectItem value="left">Left</SelectItem>
+              <SelectItem value="center">Center</SelectItem>
+              <SelectItem value="right">Right</SelectItem>
+              <SelectItem value="justify">Justify</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function GlobalSettingsDialog({ open, onOpenChange }: Props) {
   const { sheet, updateMetadata, updateConfig } = useSheetStore();
   const { metadata, config } = sheet;
 
+  const handleClassChange = (classKey: string, styles: Partial<ElementStyles>) => {
+    const current = config.classDefaults ?? {};
+    // Remove keys that are undefined so they fall back to inherit
+    const cleaned: ElementStyles = {};
+    if (styles.fontFamily) cleaned.fontFamily = styles.fontFamily;
+    if (styles.fontSize) cleaned.fontSize = styles.fontSize;
+    if (styles.justification) cleaned.justification = styles.justification;
+    if (styles.customClasses?.length) cleaned.customClasses = styles.customClasses;
+
+    updateConfig({
+      classDefaults: {
+        ...current,
+        [classKey]: cleaned,
+      },
+    });
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Sheet Settings</DialogTitle>
         </DialogHeader>
@@ -39,6 +159,7 @@ export function GlobalSettingsDialog({ open, onOpenChange }: Props) {
           <TabsList className="w-full">
             <TabsTrigger value="metadata" className="flex-1">Metadata</TabsTrigger>
             <TabsTrigger value="page" className="flex-1">Page Setup</TabsTrigger>
+            <TabsTrigger value="classes" className="flex-1">Class Styles</TabsTrigger>
             <TabsTrigger value="numbering" className="flex-1">Numbering</TabsTrigger>
           </TabsList>
 
@@ -149,11 +270,9 @@ export function GlobalSettingsDialog({ open, onOpenChange }: Props) {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Times New Roman">Times New Roman</SelectItem>
-                    <SelectItem value="Arial">Arial</SelectItem>
-                    <SelectItem value="Georgia">Georgia</SelectItem>
-                    <SelectItem value="David">David (Hebrew)</SelectItem>
-                    <SelectItem value="Taamey Frank CLM">Taamey Frank CLM</SelectItem>
+                    {FONT_OPTIONS.map((f) => (
+                      <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -171,11 +290,9 @@ export function GlobalSettingsDialog({ open, onOpenChange }: Props) {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="10pt">10pt</SelectItem>
-                    <SelectItem value="11pt">11pt</SelectItem>
-                    <SelectItem value="12pt">12pt (default)</SelectItem>
-                    <SelectItem value="13pt">13pt</SelectItem>
-                    <SelectItem value="14pt">14pt</SelectItem>
+                    {SIZE_OPTIONS.map((s) => (
+                      <SelectItem key={s} value={s}>{s}{s === '12pt' ? ' (default)' : ''}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -226,6 +343,76 @@ export function GlobalSettingsDialog({ open, onOpenChange }: Props) {
                 </div>
               ))}
             </div>
+
+            <Separator />
+
+            {/* Source Defaults */}
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+              Default Source Display
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Layout</Label>
+                <Select
+                  value={config.sourceDefaults?.layout ?? 'side-by-side'}
+                  onValueChange={(v) =>
+                    updateConfig({
+                      sourceDefaults: {
+                        ...config.sourceDefaults,
+                        layout: v as 'side-by-side' | 'stacked' | 'single',
+                      },
+                    })
+                  }
+                >
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="side-by-side">Side by side</SelectItem>
+                    <SelectItem value="stacked">Stacked</SelectItem>
+                    <SelectItem value="single">Single language</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Primary language</Label>
+                <Select
+                  value={config.sourceDefaults?.primaryLanguage ?? 'he'}
+                  onValueChange={(v) =>
+                    updateConfig({
+                      sourceDefaults: {
+                        ...config.sourceDefaults,
+                        primaryLanguage: v as 'en' | 'he',
+                      },
+                    })
+                  }
+                >
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="he">Hebrew</SelectItem>
+                    <SelectItem value="en">English</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* ── Class Styles ──────────────────────────────────────── */}
+          <TabsContent value="classes" className="pt-3">
+            <p className="text-sm text-muted-foreground mb-2">
+              Set default styles per element class. These override the sheet defaults and can be further overridden at the section and element level.
+            </p>
+            {DEFAULT_CLASS_NAMES.map(({ key, label }) => (
+              <ClassStyleRow
+                key={key}
+                label={label}
+                classKey={key}
+                styles={config.classDefaults?.[key]}
+                onChange={handleClassChange}
+              />
+            ))}
           </TabsContent>
 
           {/* ── Numbering ────────────────────────────────────────── */}

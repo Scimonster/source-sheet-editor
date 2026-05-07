@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -16,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 
 interface Props {
   text: TextElement;
@@ -28,6 +30,8 @@ export function TextConfigDialog({ text, open, onOpenChange }: Props) {
 
   const update = (styles: Partial<TextElement['styles']>) =>
     updateElement(text.id, { styles: { ...text.styles, ...styles } });
+
+  const classesStr = (text.styles?.customClasses ?? []).join(', ');
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -46,10 +50,11 @@ export function TextConfigDialog({ text, open, onOpenChange }: Props) {
                 <SelectValue placeholder="Inherit from sheet" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="inherit">Inherit from sheet</SelectItem>
+                <SelectItem value="inherit">Inherit</SelectItem>
                 <SelectItem value="Times New Roman">Times New Roman</SelectItem>
                 <SelectItem value="Arial">Arial</SelectItem>
                 <SelectItem value="Georgia">Georgia</SelectItem>
+                <SelectItem value="David">David</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -63,7 +68,7 @@ export function TextConfigDialog({ text, open, onOpenChange }: Props) {
                 <SelectValue placeholder="Inherit from sheet" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="inherit">Inherit from sheet</SelectItem>
+                <SelectItem value="inherit">Inherit</SelectItem>
                 <SelectItem value="10pt">10pt</SelectItem>
                 <SelectItem value="11pt">11pt</SelectItem>
                 <SelectItem value="12pt">12pt</SelectItem>
@@ -89,13 +94,33 @@ export function TextConfigDialog({ text, open, onOpenChange }: Props) {
                 <SelectValue placeholder="Inherit from sheet" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="inherit">Inherit from sheet</SelectItem>
+                <SelectItem value="inherit">Inherit</SelectItem>
                 <SelectItem value="left">Left</SelectItem>
                 <SelectItem value="center">Center</SelectItem>
                 <SelectItem value="right">Right</SelectItem>
                 <SelectItem value="justify">Justify</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <Separator />
+
+          <div className="space-y-1">
+            <Label>Custom classes</Label>
+            <Input
+              value={classesStr}
+              placeholder="e.g. hebrew, instruction"
+              onChange={(e) => {
+                const classes = e.target.value
+                  .split(',')
+                  .map((c) => c.trim())
+                  .filter(Boolean);
+                update({ customClasses: classes.length ? classes : undefined });
+              }}
+            />
+            <p className="text-xs text-muted-foreground">
+              Comma-separated class names. Styles from matching global class defaults will be applied.
+            </p>
           </div>
         </div>
       </DialogContent>

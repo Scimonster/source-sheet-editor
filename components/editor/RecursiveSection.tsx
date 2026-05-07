@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useSheetStore, newSourceElement, newTextElement, newDirectionElement, newSection } from '@/lib/store';
+import { useSheetStore } from '@/lib/store';
 import { Section, ContentElement } from '@/lib/types';
 import { ContentElementRenderer } from './ContentElementRenderer';
 import { AddElementBar } from './AddElementBar';
@@ -29,9 +29,11 @@ interface Props {
   depth: number;
   /** Index within parent for Roman numeral display */
   sectionIndex?: number;
+  /** Ancestor sections from root down, for cascading style resolution */
+  ancestorSections: Section[];
 }
 
-export function RecursiveSection({ section, depth, sectionIndex = 0 }: Props) {
+export function RecursiveSection({ section, depth, sectionIndex = 0, ancestorSections }: Props) {
   const { viewMode, addElement, sheet } = useSheetStore();
   const [configOpen, setConfigOpen] = useState(false);
   const isEdit = viewMode === 'edit';
@@ -53,6 +55,9 @@ export function RecursiveSection({ section, depth, sectionIndex = 0 }: Props) {
   );
 
   const childIds = section.children.map((c) => c.id);
+
+  // Ancestor chain including this section
+  const childAncestors = [...ancestorSections, section];
 
   return (
     <ElementControls
@@ -80,9 +85,13 @@ export function RecursiveSection({ section, depth, sectionIndex = 0 }: Props) {
                   section={child as Section}
                   depth={depth + 1}
                   sectionIndex={i}
+                  ancestorSections={childAncestors}
                 />
               ) : (
-                <ContentElementRenderer element={child as ContentElement} />
+                <ContentElementRenderer
+                  element={child as ContentElement}
+                  ancestorSections={childAncestors}
+                />
               )}
               {isEdit && (
                 <AddElementBar afterId={child.id} onAdd={addElement} />

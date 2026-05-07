@@ -1,17 +1,19 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { TextElement } from '@/lib/types';
+import { TextElement, Section } from '@/lib/types';
 import { useSheetStore } from '@/lib/store';
 import { RichTextEditor } from './RichTextEditor';
 import { cn } from '@/lib/utils';
+import { resolveStyles } from '@/lib/resolve-styles';
 
 interface Props {
   text: TextElement;
+  ancestorSections: Section[];
 }
 
-export function TextRenderer({ text }: Props) {
-  const { viewMode, updateElement } = useSheetStore();
+export function TextRenderer({ text, ancestorSections }: Props) {
+  const { viewMode, updateElement, sheet } = useSheetStore();
   const isEdit = viewMode === 'edit';
   const [isEditing, setIsEditing] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -30,10 +32,13 @@ export function TextRenderer({ text }: Props) {
 
   const isEmpty = !text.content || text.content === '<p></p>' || text.content.trim() === '';
 
+  // Resolve cascading styles
+  const resolved = resolveStyles(text, ancestorSections, sheet.config);
+
   const styleProps: React.CSSProperties = {
-    fontFamily: text.styles?.fontFamily,
-    fontSize: text.styles?.fontSize,
-    textAlign: text.styles?.justification,
+    fontFamily: resolved.fontFamily,
+    fontSize: resolved.fontSize,
+    textAlign: resolved.justification,
   };
 
   // Preview / non-edit mode

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ContentElement, SourceElement, TextElement, DirectionElement } from '@/lib/types';
+import { ContentElement, SourceElement, TextElement, DirectionElement, Section } from '@/lib/types';
 import { SourceRenderer } from './SourceRenderer';
 import { TextRenderer } from './TextRenderer';
 import { DirectionRenderer } from './DirectionRenderer';
@@ -12,9 +12,10 @@ import { DirectionConfigDialog } from './DirectionConfigDialog';
 
 interface Props {
   element: ContentElement;
+  ancestorSections: Section[];
 }
 
-export function ContentElementRenderer({ element }: Props) {
+export function ContentElementRenderer({ element, ancestorSections }: Props) {
   const [configOpen, setConfigOpen] = useState(false);
 
   return (
@@ -25,7 +26,10 @@ export function ContentElementRenderer({ element }: Props) {
     >
       {element.type === 'source' && (
         <>
-          <SourceRenderer source={element as SourceElement} />
+          <SourceRenderer
+            source={element as SourceElement}
+            ancestorSections={ancestorSections}
+          />
           <SourceConfigDialog
             source={element as SourceElement}
             open={configOpen}
@@ -35,7 +39,10 @@ export function ContentElementRenderer({ element }: Props) {
       )}
       {element.type === 'text' && (
         <>
-          <TextRenderer text={element as TextElement} />
+          <TextRenderer
+            text={element as TextElement}
+            ancestorSections={ancestorSections}
+          />
           <TextConfigDialog
             text={element as TextElement}
             open={configOpen}
