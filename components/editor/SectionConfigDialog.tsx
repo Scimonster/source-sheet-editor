@@ -154,15 +154,25 @@ export function SectionConfigDialog({ section, open, onOpenChange }: Props) {
                 onChange={(e) => updateElement(section.id, { title: e.target.value })}
               />
             </div>
-            <div className="flex items-center gap-2">
-              <Switch
-                id="showBorder"
-                checked={section.showBorder}
-                onCheckedChange={(checked) =>
-                  updateElement(section.id, { showBorder: checked })
+            <div className="space-y-1">
+              <Label>Show border around section</Label>
+              <Select
+                value={section.showBorder.toString()}
+                onValueChange={(v) =>
+                  updateElement(section.id, {
+                    showBorder: v === 'inherit' ? 'inherit' : v === 'true',
+                  })
                 }
-              />
-              <Label htmlFor="showBorder">Show border around section</Label>
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Inherit" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="inherit">Inherit from sheet</SelectItem>
+                  <SelectItem value="true">Yes</SelectItem>
+                  <SelectItem value="false">No</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </TabsContent>
 

@@ -195,3 +195,33 @@ export function resolveTitleDisplay(
 
   return resolved;
 }
+
+/**
+ * Resolve effective properties for a section.
+ *
+ * Resolution order:
+ * 1. Hard-coded defaults
+ * 2. globalConfig.sectionDefaults
+ * 3. Nearest ancestor section's properties
+ * 4. Section's own properties
+ */
+export function resolveSectionProperties(
+  section: Section,
+  ancestorSections: Section[],
+  globalConfig: GlobalConfig
+): { showBorder: boolean } {
+  let showBorder = false;
+
+  if (globalConfig.sectionDefaults?.showBorder !== undefined) {
+    showBorder = globalConfig.sectionDefaults.showBorder;
+  }
+
+  // If we ever add section-level defaults for child sections, we'd process ancestors here.
+  // Currently, we just inherit from global.
+
+  if (section.showBorder !== 'inherit') {
+    showBorder = section.showBorder;
+  }
+
+  return { showBorder };
+}

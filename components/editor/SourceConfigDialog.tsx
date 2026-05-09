@@ -79,20 +79,21 @@ export function SourceConfigDialog({ source, open, onOpenChange }: Props) {
               <div className="space-y-1">
                 <Label>Layout</Label>
                 <Select
-                  value={displayOptions.layout}
+                  value={displayOptions.layout ?? 'inherit'}
                   onValueChange={(v) =>
                     update({
                       displayOptions: {
                         ...displayOptions,
-                        layout: v as SourceElement['displayOptions']['layout'],
+                        layout: v === 'inherit' ? undefined : (v as SourceElement['displayOptions']['layout']),
                       },
                     })
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Inherit" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="inherit">Inherit</SelectItem>
                     <SelectItem value="side-by-side">Side by side</SelectItem>
                     <SelectItem value="stacked">Stacked</SelectItem>
                     <SelectItem value="single">Single language</SelectItem>
@@ -102,40 +103,42 @@ export function SourceConfigDialog({ source, open, onOpenChange }: Props) {
               <div className="space-y-1">
                 <Label>Primary language</Label>
                 <Select
-                  value={displayOptions.primaryLanguage}
+                  value={displayOptions.primaryLanguage ?? 'inherit'}
                   onValueChange={(v) =>
                     update({
                       displayOptions: {
                         ...displayOptions,
-                        primaryLanguage: v as 'en' | 'he',
+                        primaryLanguage: v === 'inherit' ? undefined : (v as 'en' | 'he'),
                       },
                     })
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Inherit" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="inherit">Inherit</SelectItem>
                     <SelectItem value="he">Hebrew</SelectItem>
                     <SelectItem value="en">English</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              {displayOptions.layout === 'side-by-side' && (
+              {(displayOptions.layout === 'side-by-side' || displayOptions.layout === undefined) && (
                 <div className="space-y-1 col-span-2">
                   <Label>Column ratio (primary language width)</Label>
                   <Select
-                    value={displayOptions.columnRatio ?? '50%'}
+                    value={displayOptions.columnRatio ?? 'inherit'}
                     onValueChange={(v) =>
                       update({
-                        displayOptions: { ...displayOptions, columnRatio: v },
+                        displayOptions: { ...displayOptions, columnRatio: v === 'inherit' ? undefined : v },
                       })
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder="Inherit" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="inherit">Inherit</SelectItem>
                       <SelectItem value="33%">33% / 67%</SelectItem>
                       <SelectItem value="50%">50% / 50%</SelectItem>
                       <SelectItem value="67%">67% / 33%</SelectItem>

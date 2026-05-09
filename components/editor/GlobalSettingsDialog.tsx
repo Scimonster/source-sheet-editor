@@ -346,6 +346,25 @@ export function GlobalSettingsDialog({ open, onOpenChange }: Props) {
 
             <Separator />
 
+            {/* Section Defaults */}
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+              Default Section Settings
+            </p>
+            <div className="flex items-center gap-2">
+              <Switch
+                id="globalShowBorder"
+                checked={config.sectionDefaults?.showBorder ?? false}
+                onCheckedChange={(checked) =>
+                  updateConfig({
+                    sectionDefaults: { ...config.sectionDefaults, showBorder: checked },
+                  })
+                }
+              />
+              <Label htmlFor="globalShowBorder">Show border around sections</Label>
+            </div>
+
+            <Separator />
+
             {/* Source Defaults */}
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
               Default Source Display

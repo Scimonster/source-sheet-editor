@@ -7,6 +7,7 @@ import { ContentElementRenderer } from './ContentElementRenderer';
 import { AddElementBar } from './AddElementBar';
 import { ElementControls } from './ElementControls';
 import { SectionConfigDialog } from './SectionConfigDialog';
+import { resolveSectionProperties } from '@/lib/resolve-styles';
 import { cn } from '@/lib/utils';
 import {
   SortableContext,
@@ -41,6 +42,8 @@ export function RecursiveSection({ section, depth, sectionIndex = 0, ancestorSec
   const showSectionNumbers = sheet.config.showSectionNumbers;
   const headingTag: 'h2' | 'h3' | 'h4' = depth === 0 ? 'h2' : depth === 1 ? 'h3' : 'h4';
 
+  const { showBorder } = resolveSectionProperties(section, ancestorSections, sheet.config);
+
   // Build title with optional Roman numeral prefix (only depth-0)
   const displayTitle =
     showSectionNumbers && depth === 0
@@ -67,8 +70,8 @@ export function RecursiveSection({ section, depth, sectionIndex = 0, ancestorSec
     >
       <div
         className={cn(
-          section.showBorder && 'border border-border rounded-md p-4',
-          section.showBorder && depth > 0 && 'ml-4',
+          showBorder && 'border border-border rounded-md p-4',
+          showBorder && depth > 0 && 'ml-4',
         )}
       >
         {/* Section title */}

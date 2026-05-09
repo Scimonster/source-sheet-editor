@@ -42,11 +42,7 @@ export interface SourceElement {
     en: SourceContent;
     he: SourceContent;
   };
-  displayOptions: {
-    layout: 'side-by-side' | 'stacked' | 'single';
-    primaryLanguage: 'en' | 'he';
-    columnRatio?: string;
-  };
+  displayOptions: SourceDisplayOptions;
   titleDisplay?: TitleDisplayOptions;
   directionNote?: RichText;
   styles?: ElementStyles;
@@ -103,7 +99,7 @@ export interface Section {
   id: string;
   type: 'section';
   title: string;
-  showBorder: boolean;
+  showBorder: boolean | 'inherit';
   styles?: ElementStyles;
   children: (Section | ContentElement)[];
   /** Override styles for child elements by class/category */
@@ -128,6 +124,10 @@ export interface GlobalConfig {
     right: number;
   };
   defaultStyles: ElementStyles;
+  /** Default properties for sections */
+  sectionDefaults?: {
+    showBorder?: boolean;
+  };
   /** Per-class style defaults (e.g. sectionHeader, source, text, hebrew, english, sourceTitle) */
   classDefaults?: ClassStyleDefaults;
   /** Default source display options (layout, language, column ratio) */
