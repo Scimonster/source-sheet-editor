@@ -5,23 +5,30 @@
 
 :root {
   /* Warm parchment / scholarly academic palette */
-  --background: oklch(0.968 0.006 78);        /* warm off-white parchment */
-  --foreground: oklch(0.18 0.012 258);         /* deep charcoal */
-  --card: oklch(1 0 0);                        /* pure white for paper */
+  --background: oklch(0.968 0.006 78);
+  /* warm off-white parchment */
+  --foreground: oklch(0.18 0.012 258);
+  /* deep charcoal */
+  --card: oklch(1 0 0);
+  /* pure white for paper */
   --card-foreground: oklch(0.18 0.012 258);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.18 0.012 258);
-  --primary: oklch(0.26 0.025 258);            /* dark navy charcoal */
+  --primary: oklch(0.26 0.025 258);
+  /* dark navy charcoal */
   --primary-foreground: oklch(0.97 0.003 78);
-  --secondary: oklch(0.93 0.008 78);           /* slightly deeper parchment */
+  --secondary: oklch(0.93 0.008 78);
+  /* slightly deeper parchment */
   --secondary-foreground: oklch(0.26 0.025 258);
   --muted: oklch(0.93 0.008 78);
   --muted-foreground: oklch(0.46 0.012 258);
-  --accent: oklch(0.52 0.13 172);              /* warm teal accent */
+  --accent: oklch(0.52 0.13 172);
+  /* warm teal accent */
   --accent-foreground: oklch(0.97 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.87 0.009 78);              /* warm cream border */
+  --border: oklch(0.87 0.009 78);
+  /* warm cream border */
   --input: oklch(0.87 0.009 78);
   --ring: oklch(0.52 0.13 172);
   --chart-1: oklch(0.646 0.222 41.116);
@@ -124,6 +131,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -146,6 +154,7 @@
 
 /* Print styles */
 @media print {
+
   /* Hide all UI chrome */
   .print\:hidden,
   [data-print-hidden],
@@ -153,7 +162,8 @@
     display: none !important;
   }
 
-  html, body {
+  html,
+  body {
     background: white !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
@@ -167,7 +177,7 @@
   }
 
   /* Remove the extra px-12 wrapper padding */
-  main > div {
+  main>div {
     padding: 0 !important;
   }
 
@@ -202,7 +212,8 @@
   }
 
   /* Avoid page breaks inside sources */
-  .mb-3, .mb-4 {
+  .mb-3,
+  .mb-4 {
     break-inside: avoid;
   }
 }
@@ -211,4 +222,21 @@
 [dir="rtl"] .prose p,
 [dir="rtl"] .prose li {
   text-align: right;
+}
+
+@layer components {
+  .prose ol {
+    list-style-type: decimal;
+    list-style-position: inside;
+  }
+
+  .prose ul {
+    list-style-type: disc;
+    list-style-position: inside;
+  }
+
+  .prose li p {
+    margin: 0;
+    display: inline;
+  }
 }

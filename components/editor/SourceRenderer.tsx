@@ -241,12 +241,12 @@ export function SourceRenderer({ source, ancestorSections }: Props) {
 
   const sourceBody =
     layout === 'side-by-side' ? (
-      <div className="flex gap-3" dir="rtl">
-        <div className="flex-shrink-0" style={{ width: heWidth }}>
-          {heContent}
-        </div>
+      <div className="flex gap-3">
         <div className="flex-shrink-0" style={{ width: enWidth }} dir="ltr">
           {enContent}
+        </div>
+        <div className="flex-shrink-0" style={{ width: heWidth }} dir="rtl">
+          {heContent}
         </div>
       </div>
     ) : layout === 'stacked' ? (

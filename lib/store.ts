@@ -169,7 +169,7 @@ export const useSheetStore = create<SheetState>()(
         set((s) => {
           const content = cloneNode(s.sheet.content) as (Section | ContentElement)[];
           if (afterId === null) {
-            content.push(element);
+            content.unshift(element);
           } else {
             const found = findParentList(content, afterId);
             if (found) {

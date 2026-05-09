@@ -134,7 +134,7 @@ export function ElementControls({ node, onConfigure, children, className }: Prop
                 <Settings2 className="size-3.5" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="right">Configure</TooltipContent>
+            <TooltipContent side="bottom">Configure</TooltipContent>
           </Tooltip>
 
           <Tooltip>
@@ -149,7 +149,7 @@ export function ElementControls({ node, onConfigure, children, className }: Prop
                 <Copy className="size-3.5" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="right">Duplicate</TooltipContent>
+            <TooltipContent side="bottom">Duplicate</TooltipContent>
           </Tooltip>
 
           <Tooltip>
@@ -164,7 +164,7 @@ export function ElementControls({ node, onConfigure, children, className }: Prop
                 <Trash2 className="size-3.5" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="right">Delete</TooltipContent>
+            <TooltipContent side="bottom">Delete</TooltipContent>
           </Tooltip>
         </div>
 

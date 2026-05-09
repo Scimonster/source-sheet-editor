@@ -103,7 +103,7 @@ export function EditorCanvas() {
           )}
 
           {/* Sheet title */}
-          <header className="mb-8 text-center border-b border-border pb-5">
+          <header className="mb-8 text-center pb-5">
             {metadata.title && (
               <h1 className="font-serif text-3xl font-semibold text-foreground leading-tight text-balance">
                 {metadata.title}

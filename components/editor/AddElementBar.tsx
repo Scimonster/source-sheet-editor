@@ -35,7 +35,7 @@ export function AddElementBar({ afterId, onAdd }: Props) {
   return (
     <div
       className={cn(
-        'relative flex items-center justify-center h-6 my-1 group/bar'
+        'relative flex items-center justify-center h-6 my-0 group/bar'
       )}
       onMouseLeave={() => setOpen(false)}
     >
@@ -60,7 +60,7 @@ export function AddElementBar({ afterId, onAdd }: Props) {
 
       {/* Popup menu */}
       {open && (
-        <div className="absolute z-20 top-full mt-1 left-1/2 -translate-x-1/2 flex gap-1 bg-popover border border-border rounded-lg shadow-md p-1">
+        <div className="absolute z-20 top-full mt-0 left-1/2 -translate-x-1/2 flex gap-1 bg-popover border border-border rounded-lg shadow-md p-1">
           {items.map(({ label, icon: Icon, create }) => (
             <button
               key={label}
