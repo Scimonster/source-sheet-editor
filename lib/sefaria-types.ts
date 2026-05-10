@@ -31,11 +31,13 @@ export interface SefariaVersion {
   title?: string; // Present in some version objects
 }
 
+export type TextContent = string | TextContent[]
+
 /**
  * Extends the base version to include the actual text content.
  */
 export interface SefariaVersionWithText extends SefariaVersion {
-  text: string | string[] | string[][];
+  text: TextContent;
 }
 
 /**
@@ -79,4 +81,29 @@ export interface SefariaTextResponse {
   // The version arrays
   versions: SefariaVersionWithText[];
   available_versions: SefariaVersion[];
+}
+
+/**
+ * Takes a gematria reference (e.g. "1a", "10b", "100a") and returns the next or previous amud reference.
+ * @param currentRef the current daf reference (e.g. "1a", "10b", "100a")
+ * @param direction "next" or "prev"
+ * @param offset the number of amudim to skip (default: 1)
+ * @returns the next or previous amud reference
+ */
+export const nextDafRef = (currentRef: string, direction: "next" | "prev" = "next", offset: number = 1) => {
+  const match = currentRef.match(/(\d+)([ab])/)
+  if (!match) return currentRef
+  const [_, daf, side] = match
+  const dafNum = parseInt(daf, 10)
+  if (direction === "next") {
+    if (side === "a" && offset % 2 == 1) return `${dafNum + Math.floor(offset / 2)}b`
+    if (side === "b" && offset % 2 == 1) return `${dafNum + Math.floor(offset / 2) + 1}a`
+    if (offset % 2 == 0) return `${dafNum + offset / 2}${side}`
+  }
+  if (direction === "prev") {
+    if (side === "a" && offset % 2 == 1) return `${dafNum - Math.floor(offset / 2) - 1}b`
+    if (side === "b" && offset % 2 == 1) return `${dafNum - Math.floor(offset / 2)}a`
+    if (offset % 2 == 0) return `${dafNum - offset / 2}${side}`
+  }
+  return currentRef
 }
