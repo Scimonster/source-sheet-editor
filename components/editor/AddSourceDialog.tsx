@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Info } from 'lucide-react';
 
 type SourceSegment = {
   text: string;
@@ -93,7 +94,7 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({ onAdd, onClose
     }
   };
 
-  const processText = (data: SefariaTextResponse | null, isHebrew: boolean): string => {
+  const processText = (data: SefariaTextResponse | null, isHebrew: boolean, forDisplay: boolean = false): string => {
     if (!data || !data.versions.length) return "";
     const version = data.versions[0] as SefariaVersionWithText;
     let textArr = Array.isArray(version.text) ? version.text : [version.text];
@@ -116,6 +117,11 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({ onAdd, onClose
         if (hebrewDisplay === 'plain') t = t.replace(/[\u0591-\u05C7]/g, "");
         else if (hebrewDisplay === 'nikud') t = t.replace(/[\u0591-\u05AF\u05BD\u05BF\u05C0\u05C4\u05C5]/g, "");
       }
+      if (forDisplay) {
+        const refStr = segment.sectionRef ? segment.sectionRef.join(':') : '';
+        const safeIndex = data.indexTitle.replace(/"/g, '&quot;');
+        t = `<span data-segment-index="${safeIndex}" data-segment-ref="${refStr}">${t}</span>`;
+      }
       return t;
     }).map((segment) => layoutMode === 'compact' ? segment : `<p>${segment}</p>`).join(' ');
   };
@@ -127,12 +133,86 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({ onAdd, onClose
       type: 'source',
       ref: { en: enData.ref, he: heData.heRef, link: `https://www.sefaria.org/${enData.ref}` },
       content: {
-        he: { text: processText(heData, true), license: { name: heData.versions[0].license } },
-        en: { text: processText(enData, false), license: { name: enData.versions[0].license } }
+        he: { text: processText(heData, true, false), license: { name: heData.versions[0].license } },
+        en: { text: processText(enData, false, false), license: { name: enData.versions[0].license } }
       },
       displayOptions: { layout: 'side-by-side', primaryLanguage: 'he' }
     });
     onClose();
+  };
+
+  const handleSelection = () => {
+    const selection = window.getSelection();
+    if (!selection || selection.isCollapsed) return;
+
+    const range = selection.getRangeAt(0);
+    const startNode = range.startContainer;
+    const endNode = range.endContainer;
+
+    let startElement = startNode.nodeType === Node.TEXT_NODE ? startNode.parentElement : startNode as HTMLElement;
+    let endElement = endNode.nodeType === Node.TEXT_NODE ? endNode.parentElement : endNode as HTMLElement;
+
+    // Fallback if the user selected text surrounding the spans
+    if (startElement && !startElement.closest('[data-segment-ref]')) {
+      if (startNode.nodeType === Node.TEXT_NODE && startNode.nextSibling) {
+        startElement = startNode.nextSibling as HTMLElement;
+      } else if (startElement.firstElementChild) {
+        startElement = startElement.firstElementChild as HTMLElement;
+      }
+    }
+    if (endElement && !endElement.closest('[data-segment-ref]')) {
+      if (endNode.nodeType === Node.TEXT_NODE && endNode.previousSibling) {
+        endElement = endNode.previousSibling as HTMLElement;
+      } else if (endElement.lastElementChild) {
+        endElement = endElement.lastElementChild as HTMLElement;
+      }
+    }
+
+    const startSpan = startElement?.closest('[data-segment-ref]');
+    const endSpan = endElement?.closest('[data-segment-ref]');
+
+    if (startSpan && endSpan) {
+      const startIndex = startSpan.getAttribute('data-segment-index');
+      const startRef = startSpan.getAttribute('data-segment-ref');
+      const endIndex = endSpan.getAttribute('data-segment-index');
+      const endRef = endSpan.getAttribute('data-segment-ref');
+
+      if (startIndex && endIndex && startIndex === endIndex) {
+        if (startRef === endRef) {
+          setRefInput(startRef ? `${startIndex} ${startRef}` : startIndex);
+        } else if (startRef && endRef) {
+          const startSecParts = startRef.split(':');
+          const endSecParts = endRef.split(':');
+
+          let commonPrefixIndex = -1;
+          for (let i = 0; i < startSecParts.length - 1; i++) {
+            if (startSecParts[i] === endSecParts[i]) {
+              commonPrefixIndex = i;
+            } else {
+              break;
+            }
+          }
+
+          if (commonPrefixIndex >= 0 && commonPrefixIndex === startSecParts.length - 2) {
+            setRefInput(`${startIndex} ${startRef}-${endSecParts[endSecParts.length - 1]}`);
+          } else {
+            setRefInput(`${startIndex} ${startRef}-${endRef}`);
+          }
+        }
+      } else {
+        const s = startRef ? `${startIndex} ${startRef}` : startIndex;
+        const e = endRef ? `${endIndex} ${endRef}` : endIndex;
+        if (s && e) setRefInput(`${s}-${e}`);
+      }
+    } else if (startSpan) {
+      const startIndex = startSpan.getAttribute('data-segment-index');
+      const startRef = startSpan.getAttribute('data-segment-ref');
+      if (startIndex) setRefInput(startRef ? `${startIndex} ${startRef}` : startIndex);
+    } else if (endSpan) {
+      const endIndex = endSpan.getAttribute('data-segment-index');
+      const endRef = endSpan.getAttribute('data-segment-ref');
+      if (endIndex) setRefInput(endRef ? `${endIndex} ${endRef}` : endIndex);
+    }
   };
 
   return (
@@ -157,6 +237,12 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({ onAdd, onClose
               {loading ? 'Searching...' : 'Search'}
             </Button>
           </form>
+          <div className="mt-3 flex items-start gap-2 text-sm text-muted-foreground">
+            <Info className="h-4 w-4 mt-0.5 shrink-0" />
+            <p>
+              <strong>Tip:</strong> Need to quote a specific section of Gemara or a longer text without clear divisions? Search for the broader reference (e.g., <em>Brachot 2a-2b</em>), then highlight the lines you want in the results below to automatically refine your search.
+            </p>
+          </div>
         </div>
 
         {/* Toolbar */}
@@ -207,7 +293,7 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({ onAdd, onClose
         ) : (
           <div className="flex flex-1 gap-4 overflow-hidden p-4">
             {/* English Panel */}
-            <div className="flex flex-1 flex-col overflow-hidden rounded-lg border">
+            <div className="flex flex-1 flex-col overflow-hidden rounded-lg border" onMouseUp={handleSelection}>
               <div className="bg-muted/30 p-2 text-xs">
                 <label className="block font-bold text-muted-foreground uppercase mb-1">English Version</label>
                 <Select
@@ -226,12 +312,12 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({ onAdd, onClose
               </div>
               <div
                 className="flex-1 overflow-y-auto p-4 text-left leading-relaxed text-foreground prose prose-sm max-w-none"
-                dangerouslySetInnerHTML={{ __html: processText(enData, false) }}
+                dangerouslySetInnerHTML={{ __html: processText(enData, false, true) }}
               />
             </div>
 
             {/* Hebrew Panel */}
-            <div className="flex flex-1 flex-col overflow-hidden rounded-lg border">
+            <div className="flex flex-1 flex-col overflow-hidden rounded-lg border" onMouseUp={handleSelection}>
               <div className="bg-muted/30 p-2 text-xs" dir="rtl">
                 <label className="block font-bold text-muted-foreground uppercase mb-1">גרסה</label>
                 <Select
@@ -251,7 +337,7 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({ onAdd, onClose
               <div
                 dir="rtl"
                 className="flex-1 overflow-y-auto p-4 text-right font-serif text-xl leading-loose text-foreground"
-                dangerouslySetInnerHTML={{ __html: processText(heData, true) }}
+                dangerouslySetInnerHTML={{ __html: processText(heData, true, true) }}
               />
             </div>
           </div>
