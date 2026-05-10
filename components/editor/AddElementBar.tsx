@@ -16,6 +16,7 @@ import {
   Navigation,
   Layers,
 } from 'lucide-react';
+import { AddSourceDialog } from './AddSourceDialog';
 
 interface Props {
   afterId: string | null;
@@ -31,6 +32,7 @@ const items = [
 
 export function AddElementBar({ afterId, onAdd }: Props) {
   const [open, setOpen] = useState(false);
+  const [sourceAdderOpen, setSourceAdderOpen] = useState(false);
 
   return (
     <div
@@ -65,6 +67,11 @@ export function AddElementBar({ afterId, onAdd }: Props) {
             <button
               key={label}
               onClick={() => {
+                if (label === 'Source') {
+                  setSourceAdderOpen(true);
+                  setOpen(false);
+                  return;
+                }
                 onAdd(afterId, create() as Section | ContentElement);
                 setOpen(false);
               }}
@@ -75,6 +82,12 @@ export function AddElementBar({ afterId, onAdd }: Props) {
             </button>
           ))}
         </div>
+      )}
+      {sourceAdderOpen && (
+        <AddSourceDialog
+          onAdd={(element) => onAdd(afterId, element)}
+          onClose={() => setSourceAdderOpen(false)}
+        />
       )}
     </div>
   );
