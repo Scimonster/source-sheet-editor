@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Info } from 'lucide-react';
+import { newSourceElement } from '@/lib/store';
 
 type SourceSegment = {
   text: string;
@@ -345,8 +346,14 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({ onAdd, onClose
 
         {/* Footer */}
         <div className="flex justify-end gap-3 border-t bg-muted/30 p-4">
-          <Button variant="ghost" onClick={onClose}>
+          <Button variant="outline" onClick={onClose}>
             Cancel
+          </Button>
+          <Button variant="outline" onClick={() => {
+            onAdd(newSourceElement());
+            onClose();
+          }}>
+            Add empty source
           </Button>
           <Button
             onClick={handleComplete}
