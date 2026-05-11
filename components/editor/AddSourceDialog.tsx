@@ -69,6 +69,8 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({ onAdd, onClose
   const [showVerseNumbers, setShowVerseNumbers] = useState(true);
   const [hebrewDisplay, setHebrewDisplay] = useState<'plain' | 'nikud' | 'teamim'>('teamim');
   const [stripHtml, setStripHtml] = useState(false);
+  const [footnotesMode, setFootnotesMode] = useState<'in-place' | 'remove' | 'at-bottom'>('at-bottom');
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
 
   const fetchSource = async (ref: string, lang: 'he' | 'en', versionTitle?: string) => {
     setLoading(true);
@@ -109,9 +111,40 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({ onAdd, onClose
 
     return segments.map((segment) => {
       let t = segment.text;
-      if (stripHtml) t = t
-        .replace(/<sup class="footnote-marker">.*?<\/sup><i class="footnote">.*?<\/i>/g, '') // remove footnotes
-        .replace(/<[^>]*>?/gm, ''); // remove html tags
+
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = t;
+
+      const isRemove = footnotesMode === 'remove' || stripHtml;
+      if (isRemove) {
+        tempDiv.querySelectorAll('.footnote-marker, .footnote').forEach(el => el.remove());
+      } else if (footnotesMode === 'at-bottom') {
+        const notes = Array.from(tempDiv.querySelectorAll('.footnote'));
+        if (notes.length > 0) {
+          const bottomDiv = document.createElement('div');
+          bottomDiv.className = 'footnotes-bottom';
+          notes.forEach((note, index) => {
+            const marker = note.previousElementSibling;
+            if (marker && marker.classList.contains('footnote-marker')) {
+              if (index > 0) {
+                // Add some spacing between footnotes at the bottom
+                const space = document.createTextNode(' ');
+                bottomDiv.appendChild(space);
+              }
+              bottomDiv.appendChild(marker.cloneNode(true));
+            }
+            bottomDiv.appendChild(note.cloneNode(true));
+            note.remove();
+          });
+          tempDiv.appendChild(bottomDiv);
+        }
+      }
+
+      t = tempDiv.innerHTML;
+
+      if (stripHtml) {
+        t = t.replace(/<[^>]*>?/gm, '');
+      }
       if (showVerseNumbers && segment.sectionRef && verseSectionRefIndex !== -1
         // for sources nested deeper than verses, eg commentary, only add verse number at the beginning of the commentary for each verse
         && (segment.sectionRef[verseSectionRefIndex + 1] === 1 || segment.sectionRef[verseSectionRefIndex + 1] === undefined)
@@ -259,19 +292,6 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({ onAdd, onClose
         {/* Toolbar */}
         <div className="flex flex-wrap items-center gap-6 border-b bg-background p-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-foreground">Layout:</span>
-            <Select value={layoutMode} onValueChange={(v: any) => setLayoutMode(v)}>
-              <SelectTrigger className="w-[140px] h-8 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="line-by-line">Line by Line</SelectItem>
-                <SelectItem value="compact">Compact</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex items-center gap-2">
             <span className="font-semibold text-foreground">Hebrew:</span>
             <Select value={hebrewDisplay} onValueChange={(v: any) => setHebrewDisplay(v)}>
               <SelectTrigger className="w-[140px] h-8 text-xs">
@@ -294,6 +314,50 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({ onAdd, onClose
             <Checkbox checked={stripHtml} onCheckedChange={(c) => setStripHtml(c === true)} />
             <span className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Plain Text</span>
           </label>
+
+          {showAdvancedOptions && (
+            <>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-foreground">Layout:</span>
+                <Select value={layoutMode} onValueChange={(v: any) => setLayoutMode(v)}>
+                  <SelectTrigger className="w-[140px] h-8 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="line-by-line">Line by Line</SelectItem>
+                    <SelectItem value="compact">Compact</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-foreground">Footnotes:</span>
+                <Select
+                  value={stripHtml ? 'remove' : footnotesMode}
+                  onValueChange={(v: any) => setFootnotesMode(v)}
+                  disabled={stripHtml}
+                >
+                  <SelectTrigger className="w-[120px] h-8 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="in-place">In-Place</SelectItem>
+                    <SelectItem value="at-bottom">At Bottom</SelectItem>
+                    <SelectItem value="remove">Remove</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
+          )}
+
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="ml-auto h-8 text-xs" 
+            onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+          >
+            {showAdvancedOptions ? 'Hide Advanced Options' : 'Show Advanced Options'}
+          </Button>
         </div>
 
         {/* Content Area */}
