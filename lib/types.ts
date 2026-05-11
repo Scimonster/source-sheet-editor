@@ -1,4 +1,5 @@
 export type RichText = string;
+export type NumberingScheme = 'arabic' | 'alpha' | 'roman' | 'gematriya' | 'none';
 
 export interface LicenseInfo {
   name: string;
@@ -134,8 +135,8 @@ export interface GlobalConfig {
   sourceDefaults?: SourceDisplayOptions;
   /** Default source title display */
   titleDefaults?: TitleDisplayOptions;
-  showSectionNumbers: boolean;
-  showSourceNumbers: boolean;
+  sectionNumbering: NumberingScheme;
+  sourceNumbering: NumberingScheme;
 }
 
 export interface SourceSheet {

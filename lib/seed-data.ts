@@ -30,14 +30,14 @@ export const seedSheet: SourceSheet = {
       fontSize: '12pt',
       justification: 'justify',
     },
-    showSectionNumbers: true,
-    showSourceNumbers: true,
+    sectionNumbering: 'roman',
+    sourceNumbering: 'arabic',
   },
   content: [
     {
       id: 'section-1',
       type: 'section',
-      title: 'I. The Miracle of Chanukah',
+      title: 'The Miracle of Chanukah',
       showBorder: true,
       children: [
         {
@@ -89,7 +89,7 @@ export const seedSheet: SourceSheet = {
     {
       id: 'section-2',
       type: 'section',
-      title: 'II. Halachot of lighting',
+      title: 'Halachot of lighting',
       showBorder: true,
       children: [
         {

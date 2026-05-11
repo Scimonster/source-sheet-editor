@@ -10,6 +10,7 @@ import {
   resolveSourceDisplayOptions,
   resolveTitleDisplay,
 } from '@/lib/resolve-styles';
+import { formatNumber } from '@/lib/utils';
 
 interface Props {
   source: SourceElement;
@@ -90,10 +91,11 @@ function EditablePane({
 export function SourceRenderer({ source, ancestorSections }: Props) {
   const { viewMode, updateElement, getSourceNumber, sheet } = useSheetStore();
   const isEdit = viewMode === 'edit';
-  const showNumbers = sheet.config.showSourceNumbers;
+  const sourceNumbering = sheet.config.sourceNumbering;
   const config = sheet.config;
 
   const sourceNum = getSourceNumber(source.id);
+  const formattedNum = formatNumber(sourceNum, sourceNumbering);
   const { ref, content, directionNote } = source;
 
   // ─── Resolved cascading config ──────────────────────────────────────
@@ -126,9 +128,9 @@ export function SourceRenderer({ source, ancestorSections }: Props) {
       className="flex flex-wrap items-center gap-2 mb-3 pb-1.5 border-b border-border/60"
       style={refStyle}
     >
-      {showNumbers && (
+      {formattedNum && (
         <span className="text-xs font-semibold text-muted-foreground bg-muted rounded px-1.5 py-0.5 font-sans tabular-nums">
-          {sourceNum}.
+          {formattedNum}.
         </span>
       )}
       {showHeRef && refHe && (

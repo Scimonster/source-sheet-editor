@@ -8,28 +8,17 @@ import { AddElementBar } from './AddElementBar';
 import { ElementControls } from './ElementControls';
 import { SectionConfigDialog } from './SectionConfigDialog';
 import { resolveSectionProperties } from '@/lib/resolve-styles';
-import { cn } from '@/lib/utils';
+import { cn, formatNumber } from '@/lib/utils';
 import {
   SortableContext,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { useDroppable } from '@dnd-kit/core';
 
-// Roman numeral conversion
-function toRoman(n: number): string {
-  const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
-  const syms = ['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
-  let result = '';
-  for (let i = 0; i < vals.length; i++) {
-    while (n >= vals[i]) { result += syms[i]; n -= vals[i]; }
-  }
-  return result;
-}
-
 interface Props {
   section: Section;
   depth: number;
-  /** Index within parent for Roman numeral display */
+  /** Index within parent for numbering */
   sectionIndex?: number;
   /** Ancestor sections from root down, for cascading style resolution */
   ancestorSections: Section[];
@@ -45,16 +34,14 @@ export function RecursiveSection({ section, depth, sectionIndex = 0, ancestorSec
     disabled: section.children.length > 0 || !isEdit,
   });
 
-  const showSectionNumbers = sheet.config.showSectionNumbers;
+  const sectionNumbering = sheet.config.sectionNumbering;
   const headingTag: 'h2' | 'h3' | 'h4' = depth === 0 ? 'h2' : depth === 1 ? 'h3' : 'h4';
 
   const { showBorder } = resolveSectionProperties(section, ancestorSections, sheet.config);
 
-  // Build title with optional Roman numeral prefix (only depth-0)
-  const displayTitle =
-    showSectionNumbers && depth === 0
-      ? `${toRoman(sectionIndex + 1)}. ${section.title}`
-      : section.title;
+  // Build title with optional prefix
+  const prefix = formatNumber(sectionIndex + 1, sectionNumbering);
+  const displayTitle = prefix ? `${prefix}. ${section.title}` : section.title;
 
   const sectionHeadingClass = cn(
     'font-serif font-semibold text-foreground leading-tight',
@@ -93,7 +80,7 @@ export function RecursiveSection({ section, depth, sectionIndex = 0, ancestorSec
                 <RecursiveSection
                   section={child as Section}
                   depth={depth + 1}
-                  sectionIndex={i}
+                  sectionIndex={section.children.filter((x) => x.type === 'section').indexOf(child)}
                   ancestorSections={childAncestors}
                 />
               ) : (

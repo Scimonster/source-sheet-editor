@@ -435,44 +435,61 @@ export function GlobalSettingsDialog({ open, onOpenChange }: Props) {
           </TabsContent>
 
           {/* ── Numbering ────────────────────────────────────────── */}
-          <TabsContent value="numbering" className="space-y-4 pt-3">
+          <TabsContent value="numbering" className="space-y-6 pt-3">
             <p className="text-sm text-muted-foreground">
               Control automatic numbering displayed on the sheet.
             </p>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <Switch
-                  id="sectionNumbers"
-                  checked={config.showSectionNumbers}
-                  onCheckedChange={(checked) =>
-                    updateConfig({ showSectionNumbers: checked })
+            <div className="grid grid-cols-1 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="sectionNumbering" className="text-sm font-medium">
+                  Section numbering
+                </Label>
+                <Select
+                  value={config.sectionNumbering}
+                  onValueChange={(v) =>
+                    updateConfig({ sectionNumbering: v as any })
                   }
-                />
-                <div>
-                  <Label htmlFor="sectionNumbers" className="text-sm font-medium">
-                    Section numbers
-                  </Label>
-                  <p className="text-xs text-muted-foreground">
-                    Prefix top-level sections with Roman numerals (I, II, III…)
-                  </p>
-                </div>
+                >
+                  <SelectTrigger id="sectionNumbering">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="arabic">Arabic (1, 2, 3)</SelectItem>
+                    <SelectItem value="alpha">Alpha (A, B, C)</SelectItem>
+                    <SelectItem value="roman">Roman Numerals (I, II, III)</SelectItem>
+                    <SelectItem value="gematriya">Gematriya (א, ב, ג)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Format for numbering sections.
+                </p>
               </div>
-              <div className="flex items-center gap-3">
-                <Switch
-                  id="sourceNumbers"
-                  checked={config.showSourceNumbers}
-                  onCheckedChange={(checked) =>
-                    updateConfig({ showSourceNumbers: checked })
+
+              <div className="space-y-2">
+                <Label htmlFor="sourceNumbering" className="text-sm font-medium">
+                  Source numbering
+                </Label>
+                <Select
+                  value={config.sourceNumbering}
+                  onValueChange={(v) =>
+                    updateConfig({ sourceNumbering: v as any })
                   }
-                />
-                <div>
-                  <Label htmlFor="sourceNumbers" className="text-sm font-medium">
-                    Source numbers
-                  </Label>
-                  <p className="text-xs text-muted-foreground">
-                    Number each source sequentially across the entire sheet
-                  </p>
-                </div>
+                >
+                  <SelectTrigger id="sourceNumbering">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="arabic">Arabic (1, 2, 3)</SelectItem>
+                    <SelectItem value="alpha">Alpha (A, B, C)</SelectItem>
+                    <SelectItem value="roman">Roman Numerals (I, II, III)</SelectItem>
+                    <SelectItem value="gematriya">Gematriya (א, ב, ג)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Format for numbering sources sequentially.
+                </p>
               </div>
             </div>
           </TabsContent>
