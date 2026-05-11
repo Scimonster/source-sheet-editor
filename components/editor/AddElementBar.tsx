@@ -1,38 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { Section, ContentElement } from '@/lib/types';
-import {
-  newSourceElement,
-  newTextElement,
-  newDirectionElement,
-  newSection,
-} from '@/lib/store';
 import { cn } from '@/lib/utils';
-import {
-  Plus,
-  BookText,
-  Type,
-  Navigation,
-  Layers,
-} from 'lucide-react';
-import { AddSourceDialog } from './AddSourceDialog';
+import { Plus } from 'lucide-react';
+import { AddElementButtons } from './AddElementButtons';
 
 interface Props {
-  afterId: string | null;
-  onAdd: (afterId: string | null, element: Section | ContentElement) => void;
+  afterId: string | 'START' | 'END';
 }
 
-const items = [
-  { label: 'Source', icon: BookText, create: newSourceElement },
-  { label: 'Text', icon: Type, create: newTextElement },
-  { label: 'Direction', icon: Navigation, create: newDirectionElement },
-  { label: 'Section', icon: Layers, create: newSection },
-] as const;
-
-export function AddElementBar({ afterId, onAdd }: Props) {
+export function AddElementBar({ afterId }: Props) {
   const [open, setOpen] = useState(false);
-  const [sourceAdderOpen, setSourceAdderOpen] = useState(false);
 
   return (
     <div
@@ -61,34 +39,12 @@ export function AddElementBar({ afterId, onAdd }: Props) {
       </button>
 
       {/* Popup menu */}
-      {open && (
-        <div className="absolute z-20 top-full mt-0 left-1/2 -translate-x-1/2 flex gap-1 bg-popover border border-border rounded-lg shadow-md p-1">
-          {items.map(({ label, icon: Icon, create }) => (
-            <button
-              key={label}
-              onClick={() => {
-                if (label === 'Source') {
-                  setSourceAdderOpen(true);
-                  setOpen(false);
-                  return;
-                }
-                onAdd(afterId, create() as Section | ContentElement);
-                setOpen(false);
-              }}
-              className="flex flex-col items-center gap-1 px-2 py-1.5 rounded-md hover:bg-accent text-xs text-muted-foreground hover:text-foreground transition-colors min-w-[52px]"
-            >
-              <Icon className="size-4" />
-              {label}
-            </button>
-          ))}
-        </div>
-      )}
-      {sourceAdderOpen && (
-        <AddSourceDialog
-          onAdd={(element) => onAdd(afterId, element)}
-          onClose={() => setSourceAdderOpen(false)}
-        />
-      )}
+      <div className={cn(
+        "absolute z-20 top-full mt-0 left-1/2 -translate-x-1/2 flex gap-1 bg-popover border border-border rounded-lg shadow-md p-1",
+        !open && "hidden"
+      )}>
+        <AddElementButtons insertPosition={afterId} onAdded={() => setOpen(false)} variant="bar" />
+      </div>
     </div>
   );
 }

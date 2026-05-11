@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { SourceElement } from '@/lib/types';
 import { nextDafRef, SefariaTextResponse, SefariaVersionWithText, TextContent } from '@/lib/sefaria-types';
 import gematriya from 'gematriya';
@@ -216,8 +217,13 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({ onAdd, onClose
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm text-foreground">
       <div className="flex h-full max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-xl bg-background border shadow-2xl">
 
         {/* Header */}
@@ -312,7 +318,7 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({ onAdd, onClose
                 </Select>
               </div>
               <div
-                className="flex-1 overflow-y-auto p-4 text-left leading-relaxed text-foreground prose prose-sm max-w-none"
+                className="flex-1 overflow-y-auto p-4 text-left leading-relaxed text-foreground prose dark:prose-invert prose-sm max-w-none"
                 dangerouslySetInnerHTML={{ __html: processText(enData, false, true) }}
               />
             </div>
@@ -363,6 +369,7 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({ onAdd, onClose
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

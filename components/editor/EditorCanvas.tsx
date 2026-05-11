@@ -86,72 +86,72 @@ export function EditorCanvas() {
       >
         {/* Extra horizontal padding so hover controls (absolutely positioned) don't clip */}
         <div className="px-12">
-        <div
-          className={cn(
-            'mx-auto bg-card shadow-sm border border-border/60',
-            paperClass
-          )}
-          style={marginStyle}
-        >
-          {/* Header (screen) */}
-          {hasHeader && (
-            <div className="flex justify-between items-center text-xs text-muted-foreground pb-2 mb-4 border-b border-border">
-              <span>{hdr?.left}</span>
-              <span className="font-medium">{hdr?.center}</span>
-              <span>{hdr?.right}</span>
-            </div>
-          )}
-
-          {/* Sheet title */}
-          <header className="mb-8 text-center pb-5">
-            {metadata.title && (
-              <h1 className="font-serif text-3xl font-semibold text-foreground leading-tight text-balance">
-                {metadata.title}
-              </h1>
+          <div
+            className={cn(
+              'mx-auto bg-card shadow-sm border border-border/60',
+              paperClass
             )}
-            {metadata.subtitle && (
-              <p className="font-serif text-lg text-muted-foreground mt-1.5 italic text-balance">
-                {metadata.subtitle}
-              </p>
+            style={marginStyle}
+          >
+            {/* Header (screen) */}
+            {hasHeader && (
+              <div className="flex justify-between items-center text-xs text-muted-foreground pb-2 mb-4 border-b border-border">
+                <span>{hdr?.left}</span>
+                <span className="font-medium">{hdr?.center}</span>
+                <span>{hdr?.right}</span>
+              </div>
             )}
-          </header>
 
-          {/* Add bar before first section */}
-          {isEdit && (
-            <AddElementBar afterId={null} onAdd={addElement} />
-          )}
-
-          {/* Content items (sections and elements) */}
-          {content.map((item, i) => (
-            <div key={item.id}>
-              {item.type === 'section' ? (
-                <RecursiveSection
-                  section={item as Section}
-                  depth={0}
-                  sectionIndex={i}
-                  ancestorSections={[]}
-                />
-              ) : (
-                <ContentElementRenderer
-                  element={item as ContentElement}
-                  ancestorSections={[]}
-                />
+            {/* Sheet title */}
+            <header className="mb-8 text-center pb-5">
+              {metadata.title && (
+                <h1 className="font-serif text-3xl font-semibold text-foreground leading-tight text-balance">
+                  {metadata.title}
+                </h1>
               )}
-              {isEdit && (
-                <AddElementBar afterId={item.id} onAdd={addElement} />
+              {metadata.subtitle && (
+                <p className="font-serif text-lg text-muted-foreground mt-1.5 italic text-balance">
+                  {metadata.subtitle}
+                </p>
               )}
-            </div>
-          ))}
+            </header>
 
-          {/* Footer (screen) */}
-          {hasFooter && (
-            <div className="flex justify-between items-center text-xs text-muted-foreground pt-2 mt-4 border-t border-border">
-              <span>{ftr?.left}</span>
-              <span>{ftr?.center}</span>
-              <span>{ftr?.right}</span>
-            </div>
-          )}
-        </div>
+            {/* Add bar before first section */}
+            {isEdit && (
+              <AddElementBar afterId="START" />
+            )}
+
+            {/* Content items (sections and elements) */}
+            {content.map((item, i) => (
+              <div key={item.id}>
+                {item.type === 'section' ? (
+                  <RecursiveSection
+                    section={item as Section}
+                    depth={0}
+                    sectionIndex={i}
+                    ancestorSections={[]}
+                  />
+                ) : (
+                  <ContentElementRenderer
+                    element={item as ContentElement}
+                    ancestorSections={[]}
+                  />
+                )}
+                {isEdit && (
+                  <AddElementBar afterId={item.id} />
+                )}
+              </div>
+            ))}
+
+            {/* Footer (screen) */}
+            {hasFooter && (
+              <div className="flex justify-between items-center text-xs text-muted-foreground pt-2 mt-4 border-t border-border">
+                <span>{ftr?.left}</span>
+                <span>{ftr?.center}</span>
+                <span>{ftr?.right}</span>
+              </div>
+            )}
+          </div>
         </div>
       </main>
     </DndContext>

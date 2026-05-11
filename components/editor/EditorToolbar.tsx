@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { GlobalSettingsDialog } from './GlobalSettingsDialog';
+import { AddElementButtons } from './AddElementButtons';
 import { useState } from 'react';
 
 export function EditorToolbar() {
@@ -103,6 +104,15 @@ export function EditorToolbar() {
         </div>
 
         <div className="w-px h-5 bg-white/20" />
+
+        {viewMode === 'edit' && (
+          <>
+            <div className="flex items-center gap-0.5">
+              <AddElementButtons insertPosition="END" variant="toolbar" />
+            </div>
+            <div className="w-px h-5 bg-white/20" />
+          </>
+        )}
 
         {/* Print */}
         <Tooltip>

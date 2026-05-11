@@ -121,7 +121,7 @@ interface SheetState {
 
   // Content CRUD
   addElement: (
-    afterId: string | null,
+    position: string | 'START' | 'END',
     element: Section | ContentElement
   ) => void;
   updateElement: (
@@ -165,13 +165,15 @@ export const useSheetStore = create<SheetState>()(
       setViewMode: (mode) => set({ viewMode: mode }),
       setSelectedId: (id) => set({ selectedId: id }),
 
-      addElement: (afterId, element) => {
+      addElement: (position, element) => {
         set((s) => {
           const content = cloneNode(s.sheet.content) as (Section | ContentElement)[];
-          if (afterId === null) {
+          if (position === 'START') {
             content.unshift(element);
+          } else if (position === 'END') {
+            content.push(element);
           } else {
-            const found = findParentList(content, afterId);
+            const found = findParentList(content, position);
             if (found) {
               found.list.splice(found.index + 1, 0, element);
             } else {
