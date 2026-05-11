@@ -143,6 +143,7 @@ export function SectionConfigDialog({ section, open, onOpenChange }: Props) {
             <TabsTrigger value="general" className="flex-1">General</TabsTrigger>
             <TabsTrigger value="overrides" className="flex-1">Style Overrides</TabsTrigger>
             <TabsTrigger value="sources" className="flex-1">Source Defaults</TabsTrigger>
+            <TabsTrigger value="numbering" className="flex-1">Numbering</TabsTrigger>
           </TabsList>
 
           {/* ── General ──────────────────────────────────────────── */}
@@ -298,6 +299,63 @@ export function SectionConfigDialog({ section, open, onOpenChange }: Props) {
                     <SelectItem value="left">Left</SelectItem>
                     <SelectItem value="center">Center</SelectItem>
                     <SelectItem value="right">Right</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* ── Numbering ────────────────────────────────────────── */}
+          <TabsContent value="numbering" className="space-y-4 pt-2">
+            <p className="text-xs text-muted-foreground">
+              Override numbering formats for this section and its children.
+            </p>
+
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <Label className="text-xs">Section numbering</Label>
+                <Select
+                  value={section.sectionNumbering ?? 'inherit'}
+                  onValueChange={(v) =>
+                    updateElement(section.id, {
+                      sectionNumbering: v as any,
+                    })
+                  }
+                >
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="Inherit" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="inherit">Inherit</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="arabic">Arabic (1, 2, 3)</SelectItem>
+                    <SelectItem value="alpha">Alpha (A, B, C)</SelectItem>
+                    <SelectItem value="roman">Roman Numerals (I, II, III)</SelectItem>
+                    <SelectItem value="gematriya">Gematriya (א, ב, ג)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs">Source numbering</Label>
+                <Select
+                  value={section.sourceNumbering ?? 'inherit'}
+                  onValueChange={(v) =>
+                    updateElement(section.id, {
+                      sourceNumbering: v as any,
+                    })
+                  }
+                >
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="Inherit" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="inherit">Inherit</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="arabic">Arabic (1, 2, 3)</SelectItem>
+                    <SelectItem value="alpha">Alpha (A, B, C)</SelectItem>
+                    <SelectItem value="roman">Roman Numerals (I, II, III)</SelectItem>
+                    <SelectItem value="gematriya">Gematriya (א, ב, ג)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

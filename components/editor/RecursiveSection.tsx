@@ -7,7 +7,7 @@ import { ContentElementRenderer } from './ContentElementRenderer';
 import { AddElementBar } from './AddElementBar';
 import { ElementControls } from './ElementControls';
 import { SectionConfigDialog } from './SectionConfigDialog';
-import { resolveSectionProperties } from '@/lib/resolve-styles';
+import { resolveSectionProperties, resolveSectionNumbering } from '@/lib/resolve-styles';
 import { cn, formatNumber } from '@/lib/utils';
 import {
   SortableContext,
@@ -34,7 +34,7 @@ export function RecursiveSection({ section, depth, sectionIndex = 0, ancestorSec
     disabled: section.children.length > 0 || !isEdit,
   });
 
-  const sectionNumbering = sheet.config.sectionNumbering;
+  const sectionNumbering = resolveSectionNumbering(ancestorSections, sheet.config);
   const headingTag: 'h2' | 'h3' | 'h4' = depth === 0 ? 'h2' : depth === 1 ? 'h3' : 'h4';
 
   const { showBorder } = resolveSectionProperties(section, ancestorSections, sheet.config);

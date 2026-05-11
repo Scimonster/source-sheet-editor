@@ -6,6 +6,7 @@ import {
   SourceElement,
   SourceDisplayOptions,
   TitleDisplayOptions,
+  NumberingScheme,
 } from './types';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -224,4 +225,33 @@ export function resolveSectionProperties(
   }
 
   return { showBorder };
+}
+
+/**
+ * Resolve the effective section numbering scheme for a section.
+ */
+export function resolveSectionNumbering(
+  ancestorSections: Section[],
+  globalConfig: GlobalConfig
+): NumberingScheme {
+  // Start from the innermost ancestor and work outwards
+  for (let i = ancestorSections.length - 1; i >= 0; i--) {
+    const scheme = ancestorSections[i].sectionNumbering;
+    if (scheme && scheme !== 'inherit') return scheme;
+  }
+  return globalConfig.sectionNumbering;
+}
+
+/**
+ * Resolve the effective source numbering scheme for a source within sections.
+ */
+export function resolveSourceNumbering(
+  ancestorSections: Section[],
+  globalConfig: GlobalConfig
+): NumberingScheme {
+  for (let i = ancestorSections.length - 1; i >= 0; i--) {
+    const scheme = ancestorSections[i].sourceNumbering;
+    if (scheme && scheme !== 'inherit') return scheme;
+  }
+  return globalConfig.sourceNumbering;
 }

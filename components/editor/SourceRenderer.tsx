@@ -9,6 +9,7 @@ import {
   resolveStyles,
   resolveSourceDisplayOptions,
   resolveTitleDisplay,
+  resolveSourceNumbering,
 } from '@/lib/resolve-styles';
 import { formatNumber } from '@/lib/utils';
 
@@ -91,7 +92,7 @@ function EditablePane({
 export function SourceRenderer({ source, ancestorSections }: Props) {
   const { viewMode, updateElement, getSourceNumber, sheet } = useSheetStore();
   const isEdit = viewMode === 'edit';
-  const sourceNumbering = sheet.config.sourceNumbering;
+  const sourceNumbering = resolveSourceNumbering(ancestorSections, sheet.config);
   const config = sheet.config;
 
   const sourceNum = getSourceNumber(source.id);

@@ -109,6 +109,8 @@ export interface Section {
   sourceDefaults?: SourceDisplayOptions;
   /** Override default source title display for sources in this section */
   titleDefaults?: TitleDisplayOptions;
+  sectionNumbering?: NumberingScheme | 'inherit';
+  sourceNumbering?: NumberingScheme | 'inherit';
 }
 
 /** Per-class style defaults stored at the global level */
