@@ -28,6 +28,9 @@ const getTextDepth = (text: TextContent): number => {
   return 0;
 }
 
+// support numbering for various subdivisions: pasuk (tanach), mishnah, seif (shulchan aruch), halakhah (rambam)
+const subdivisionTypes = ["Pasuk", "Mishnah", "Seif", "Halakhah"];
+
 
 const textToSegments = (data: SefariaTextResponse, textArr: TextContent, depthOffset: number = 0, startRef?: (string | number)[]): SourceSegment[] => {
   const version = data.versions[0];
@@ -101,18 +104,19 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({ onAdd, onClose
     const version = data.versions[0] as SefariaVersionWithText;
     let textArr = Array.isArray(version.text) ? version.text : [version.text];
     let segments: SourceSegment[] = textToSegments(data, textArr);
-    const pasukSectionRefIndex = data.addressTypes.indexOf("Pasuk");
+
+    const verseSectionRefIndex = Math.max(...subdivisionTypes.map(t => data.addressTypes.indexOf(t)));
 
     return segments.map((segment) => {
       let t = segment.text;
       if (stripHtml) t = t
         .replace(/<sup class="footnote-marker">.*?<\/sup><i class="footnote">.*?<\/i>/g, '') // remove footnotes
         .replace(/<[^>]*>?/gm, ''); // remove html tags
-      if (showVerseNumbers && segment.sectionRef && pasukSectionRefIndex !== -1
+      if (showVerseNumbers && segment.sectionRef && verseSectionRefIndex !== -1
         // for sources nested deeper than verses, eg commentary, only add verse number at the beginning of the commentary for each verse
-        && (segment.sectionRef[pasukSectionRefIndex + 1] === 1 || segment.sectionRef[pasukSectionRefIndex + 1] === undefined)
+        && (segment.sectionRef[verseSectionRefIndex + 1] === 1 || segment.sectionRef[verseSectionRefIndex + 1] === undefined)
       ) {
-        const verseNum = Number(segment.sectionRef[pasukSectionRefIndex]);
+        const verseNum = Number(segment.sectionRef[verseSectionRefIndex]);
         t = `<span class="verse-md">(${isHebrew ? gematriya(verseNum, { punctuate: false }) : verseNum})</span> ${t}`;
       }
       if (isHebrew) {
