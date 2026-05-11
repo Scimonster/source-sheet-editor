@@ -97,7 +97,7 @@ export function RecursiveSection({ section, depth, sectionIndex = 0, ancestorSec
                 />
               )}
               {isEdit && (
-                <AddElementBar afterId={child.id} onAdd={addElement} />
+                <AddElementBar afterId={child.id} />
               )}
             </div>
           ))}
@@ -105,7 +105,7 @@ export function RecursiveSection({ section, depth, sectionIndex = 0, ancestorSec
 
         {/* Add bar when section is empty */}
         {isEdit && section.children.length === 0 && (
-          <AddElementBar afterId={section.id} onAdd={addElement} />
+          <AddElementBar afterId={section.id} />
         )}
       </div>
 

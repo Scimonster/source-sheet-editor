@@ -108,7 +108,17 @@ export function EditorToolbar() {
         {viewMode === 'edit' && (
           <>
             <div className="flex items-center gap-0.5">
-              <AddElementButtons insertPosition="END" variant="toolbar" />
+              <AddElementButtons 
+                insertPosition="END" 
+                variant="toolbar" 
+                onAdded={(id) => {
+                  if (id) {
+                    setTimeout(() => {
+                      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 100);
+                  }
+                }}
+              />
             </div>
             <div className="w-px h-5 bg-white/20" />
           </>

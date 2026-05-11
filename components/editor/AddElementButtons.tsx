@@ -28,7 +28,7 @@ export const addElementItems = [
 
 interface Props {
   insertPosition: string | 'START' | 'END';
-  onAdded?: () => void;
+  onAdded?: (id?: string) => void;
   variant?: 'bar' | 'toolbar';
 }
 
@@ -41,8 +41,9 @@ export function AddElementButtons({ insertPosition, onAdded, variant = 'bar' }: 
       setSourceAdderOpen(true);
       return;
     }
-    addElement(insertPosition, create());
-    onAdded?.();
+    const newElement = create();
+    addElement(insertPosition, newElement);
+    onAdded?.(newElement.id);
   };
 
   return (
@@ -83,7 +84,7 @@ export function AddElementButtons({ insertPosition, onAdded, variant = 'bar' }: 
         <AddSourceDialog
           onAdd={(element) => {
             addElement(insertPosition, element);
-            onAdded?.();
+            onAdded?.(element.id);
             setSourceAdderOpen(false);
           }}
           onClose={() => setSourceAdderOpen(false)}

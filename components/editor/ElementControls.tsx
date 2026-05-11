@@ -43,12 +43,13 @@ export function ElementControls({ node, onConfigure, children, className }: Prop
   };
 
   if (viewMode !== 'edit') {
-    return <div className={className}>{children}</div>;
+    return <div id={node.id} className={className}>{children}</div>;
   }
 
   return (
     <TooltipProvider delayDuration={300}>
       <div
+        id={node.id}
         ref={setNodeRef}
         style={style}
         className={cn('group relative', className)}

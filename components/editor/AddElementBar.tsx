@@ -43,7 +43,18 @@ export function AddElementBar({ afterId }: Props) {
         "absolute z-20 top-full mt-0 left-1/2 -translate-x-1/2 flex gap-1 bg-popover border border-border rounded-lg shadow-md p-1",
         !open && "hidden"
       )}>
-        <AddElementButtons insertPosition={afterId} onAdded={() => setOpen(false)} variant="bar" />
+        <AddElementButtons 
+          insertPosition={afterId} 
+          onAdded={(id) => {
+            setOpen(false);
+            if (id) {
+              setTimeout(() => {
+                document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }, 100);
+            }
+          }} 
+          variant="bar" 
+        />
       </div>
     </div>
   );
