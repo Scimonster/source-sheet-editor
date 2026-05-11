@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Info } from 'lucide-react';
 import { newSourceElement } from '@/lib/store';
 
@@ -293,16 +294,24 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({ onAdd, onClose
         <div className="flex flex-wrap items-center gap-6 border-b bg-background p-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-foreground">Hebrew:</span>
-            <Select value={hebrewDisplay} onValueChange={(v: any) => setHebrewDisplay(v)}>
-              <SelectTrigger className="w-[140px] h-8 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="teamim">Teamim</SelectItem>
-                <SelectItem value="nikud">Nikud Only</SelectItem>
-                <SelectItem value="plain">Plain</SelectItem>
-              </SelectContent>
-            </Select>
+            <ToggleGroup 
+              type="single"
+              variant="outline"
+              size="sm"
+              value={hebrewDisplay} 
+              onValueChange={(v: any) => v && setHebrewDisplay(v)}
+              className="ml-1"
+            >
+              <ToggleGroupItem value="plain" aria-label="Plain Aleph" className="text-lg font-serif px-3">
+                א
+              </ToggleGroupItem>
+              <ToggleGroupItem value="nikud" aria-label="Aleph with Nikud" className="text-lg font-serif px-3">
+                אָ
+              </ToggleGroupItem>
+              <ToggleGroupItem value="teamim" aria-label="Aleph with Teamim" className="text-lg font-serif px-3">
+                אָ֑
+              </ToggleGroupItem>
+            </ToggleGroup>
           </div>
 
           <label className="flex cursor-pointer items-center gap-2 text-foreground">
