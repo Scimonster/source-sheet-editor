@@ -128,7 +128,7 @@ export function EditorCanvas() {
                   <RecursiveSection
                     section={item as Section}
                     depth={0}
-                    sectionIndex={i}
+                    sectionIndex={content.filter((x) => x.type === 'section').indexOf(item)}
                     ancestorSections={[]}
                   />
                 ) : (
