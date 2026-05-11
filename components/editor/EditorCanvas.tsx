@@ -13,7 +13,18 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
+  useDroppable,
 } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+
+function DropZone({ id, className, children }: { id: string; className?: string; children?: React.ReactNode }) {
+  const { setNodeRef, isOver } = useDroppable({ id });
+  return (
+    <div ref={setNodeRef} className={cn(className, isOver && "bg-accent/20 border-2 border-dashed border-accent")}>
+      {children}
+    </div>
+  );
+}
 
 export function EditorCanvas() {
   const { sheet, viewMode, moveNode, addElement } = useSheetStore();
@@ -26,7 +37,17 @@ export function EditorCanvas() {
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    moveNode(String(active.id), String(over.id), 'before');
+
+    const overIdStr = String(over.id);
+    if (overIdStr === 'START') {
+      moveNode(String(active.id), '', 'start');
+    } else if (overIdStr === 'END') {
+      moveNode(String(active.id), '', 'end');
+    } else if (overIdStr.startsWith('INSIDE_')) {
+      moveNode(String(active.id), overIdStr.replace('INSIDE_', ''), 'inside');
+    } else {
+      moveNode(String(active.id), overIdStr, 'before');
+    }
   }
 
   const isEdit = viewMode === 'edit';
@@ -118,30 +139,39 @@ export function EditorCanvas() {
 
             {/* Add bar before first section */}
             {isEdit && (
-              <AddElementBar afterId="START" />
+              <DropZone id="START" className="py-2 -mx-2 px-2 rounded-md transition-colors">
+                <AddElementBar afterId="START" />
+              </DropZone>
             )}
 
             {/* Content items (sections and elements) */}
-            {content.map((item, i) => (
-              <div key={item.id}>
-                {item.type === 'section' ? (
-                  <RecursiveSection
-                    section={item as Section}
-                    depth={0}
-                    sectionIndex={content.filter((x) => x.type === 'section').indexOf(item)}
-                    ancestorSections={[]}
-                  />
-                ) : (
-                  <ContentElementRenderer
-                    element={item as ContentElement}
-                    ancestorSections={[]}
-                  />
-                )}
-                {isEdit && (
-                  <AddElementBar afterId={item.id} />
-                )}
-              </div>
-            ))}
+            <SortableContext items={content.map(c => c.id)} strategy={verticalListSortingStrategy}>
+              {content.map((item, i) => (
+                <div key={item.id}>
+                  {item.type === 'section' ? (
+                    <RecursiveSection
+                      section={item as Section}
+                      depth={0}
+                      sectionIndex={content.filter((x) => x.type === 'section').indexOf(item)}
+                      ancestorSections={[]}
+                    />
+                  ) : (
+                    <ContentElementRenderer
+                      element={item as ContentElement}
+                      ancestorSections={[]}
+                    />
+                  )}
+                  {isEdit && (
+                    <AddElementBar afterId={item.id} />
+                  )}
+                </div>
+              ))}
+            </SortableContext>
+
+            {/* Drop zone for the very end of the page */}
+            {isEdit && content.length > 0 && (
+              <DropZone id="END" className="h-16 flex items-center justify-center border-2 border-transparent mt-4 rounded-md transition-colors text-muted-foreground text-sm" />
+            )}
 
             {/* Footer (screen) */}
             {hasFooter && (

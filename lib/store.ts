@@ -137,7 +137,7 @@ interface SheetState {
   unnestElement: (id: string) => void;
 
   // Drag & drop – move a node to a new position
-  moveNode: (dragId: string, overId: string, position: 'before' | 'after' | 'inside') => void;
+  moveNode: (dragId: string, overId: string, position: 'before' | 'after' | 'inside' | 'start' | 'end') => void;
 
   // Helpers
   getSourceNumber: (id: string) => number;
@@ -172,6 +172,15 @@ export const useSheetStore = create<SheetState>()(
             content.unshift(element);
           } else if (position === 'END') {
             content.push(element);
+          } else if (position.startsWith('INSIDE_')) {
+            const sectionId = position.replace('INSIDE_', '');
+            const found = findParentList(content, sectionId);
+            if (found) {
+              const targetNode = found.list[found.index];
+              if (targetNode.type === 'section') {
+                (targetNode as Section).children.push(element);
+              }
+            }
           } else {
             const found = findParentList(content, position);
             if (found) {
@@ -283,6 +292,10 @@ export const useSheetStore = create<SheetState>()(
             const overNode = toFound.list[toFound.index];
             if (overNode.type !== 'section') { fromFound.list.splice(fromFound.index, 0, dragNode); return s; }
             (overNode as Section).children.push(dragNode);
+          } else if (position === 'start') {
+            content.unshift(dragNode);
+          } else if (position === 'end') {
+            content.push(dragNode);
           } else {
             const toFound = findParentList(content, overId);
             if (!toFound) { fromFound.list.splice(fromFound.index, 0, dragNode); return s; }

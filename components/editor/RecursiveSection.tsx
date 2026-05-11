@@ -13,6 +13,7 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
+import { useDroppable } from '@dnd-kit/core';
 
 // Roman numeral conversion
 function toRoman(n: number): string {
@@ -38,6 +39,11 @@ export function RecursiveSection({ section, depth, sectionIndex = 0, ancestorSec
   const { viewMode, addElement, sheet } = useSheetStore();
   const [configOpen, setConfigOpen] = useState(false);
   const isEdit = viewMode === 'edit';
+
+  const { setNodeRef: setDroppableRef, isOver } = useDroppable({
+    id: `INSIDE_${section.id}`,
+    disabled: section.children.length > 0 || !isEdit,
+  });
 
   const showSectionNumbers = sheet.config.showSectionNumbers;
   const headingTag: 'h2' | 'h3' | 'h4' = depth === 0 ? 'h2' : depth === 1 ? 'h3' : 'h4';
@@ -105,7 +111,15 @@ export function RecursiveSection({ section, depth, sectionIndex = 0, ancestorSec
 
         {/* Add bar when section is empty */}
         {isEdit && section.children.length === 0 && (
-          <AddElementBar afterId={section.id} />
+          <div
+            ref={setDroppableRef}
+            className={cn(
+              "py-4 transition-colors rounded-md -mx-2 px-2",
+              isOver && "bg-accent/20 border-2 border-dashed border-accent"
+            )}
+          >
+            <AddElementBar afterId={`INSIDE_${section.id}`} />
+          </div>
         )}
       </div>
 
