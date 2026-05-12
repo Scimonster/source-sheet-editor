@@ -5,6 +5,7 @@ import { Section, ContentElement } from '@/lib/types';
 import { RecursiveSection } from './RecursiveSection';
 import { ContentElementRenderer } from './ContentElementRenderer';
 import { AddElementBar } from './AddElementBar';
+import { InlineEditableText } from './InlineEditableText';
 import { cn } from '@/lib/utils';
 import {
   DndContext,
@@ -27,7 +28,7 @@ function DropZone({ id, className, children }: { id: string; className?: string;
 }
 
 export function EditorCanvas() {
-  const { sheet, viewMode, moveNode, addElement } = useSheetStore();
+  const { sheet, viewMode, moveNode, addElement, updateMetadata } = useSheetStore();
   const { metadata, config, content } = sheet;
 
   const sensors = useSensors(
@@ -125,15 +126,34 @@ export function EditorCanvas() {
 
             {/* Sheet title */}
             <header className="mb-8 text-center pb-5">
-              {metadata.title && (
-                <h1 className="font-serif text-3xl font-semibold text-foreground leading-tight text-balance">
-                  {metadata.title}
-                </h1>
-              )}
-              {metadata.subtitle && (
-                <p className="font-serif text-lg text-muted-foreground mt-1.5 italic text-balance">
-                  {metadata.subtitle}
-                </p>
+              {isEdit ? (
+                <div className="space-y-1.5">
+                  <InlineEditableText
+                    value={metadata.title}
+                    onChangeValue={(val) => updateMetadata({ title: val })}
+                    placeholder="Sheet Title"
+                    className="font-serif text-3xl font-semibold text-foreground leading-tight text-balance"
+                  />
+                  <InlineEditableText
+                    value={metadata.subtitle || ''}
+                    onChangeValue={(val) => updateMetadata({ subtitle: val })}
+                    placeholder="Sheet Subtitle (optional)"
+                    className="font-serif text-lg text-muted-foreground italic text-balance"
+                  />
+                </div>
+              ) : (
+                <>
+                  {metadata.title && (
+                    <h1 className="font-serif text-3xl font-semibold text-foreground leading-tight text-balance">
+                      {metadata.title}
+                    </h1>
+                  )}
+                  {metadata.subtitle && (
+                    <p className="font-serif text-lg text-muted-foreground mt-1.5 italic text-balance">
+                      {metadata.subtitle}
+                    </p>
+                  )}
+                </>
               )}
             </header>
 
