@@ -43,6 +43,12 @@ export default function RootLayout({
         <footer className="border-t border-border bg-card/80 print:hidden">
           <div className="mx-auto max-w-5xl px-6 py-4 text-sm text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-2">
             <span>© {new Date().getFullYear()} Mekorly</span>
+            <Link href="/" className="hover:text-foreground underline underline-offset-4">
+              Home
+            </Link>
+            <Link href="/about" className="hover:text-foreground underline underline-offset-4">
+              About
+            </Link>
             <Link href="/terms" className="hover:text-foreground underline underline-offset-4">
               Terms of Service
             </Link>

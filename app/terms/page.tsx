@@ -15,6 +15,9 @@ export default function TermsPage() {
           This site does not store your work remotely. Your sheets and other user-generated content are stored on
           your own device.
         </p>
+        <p>
+          Mekorly has no relation to Sefaria. Mekorly uses Sefaria&apos;s public API to retrieve source material.
+        </p>
         <p>These Terms of Service may be updated at any time without notice.</p>
       </div>
     </main>
