@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter, Crimson_Text, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import Link from 'next/link'
 import './globals.css'
 
 const _inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
@@ -37,8 +38,25 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="bg-background">
-      <body className="font-sans antialiased min-h-screen">
-        {children}
+      <body className="font-sans antialiased min-h-screen flex flex-col">
+        <div className="flex-1">{children}</div>
+        <footer className="border-t border-border bg-card/80 print:hidden">
+          <div className="mx-auto max-w-5xl px-6 py-4 text-sm text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-2">
+            <span>© {new Date().getFullYear()} Mekorly</span>
+            <Link href="/" className="hover:text-foreground underline underline-offset-4">
+              Home
+            </Link>
+            <Link href="/about" className="hover:text-foreground underline underline-offset-4">
+              About
+            </Link>
+            <Link href="/terms" className="hover:text-foreground underline underline-offset-4">
+              Terms of Service
+            </Link>
+            <Link href="/privacy" className="hover:text-foreground underline underline-offset-4">
+              Privacy Policy
+            </Link>
+          </div>
+        </footer>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
