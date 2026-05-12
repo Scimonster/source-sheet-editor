@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { storageAdapter, createBlankSheet, SheetMeta } from '@/lib/storage';
-import { SheetCard } from './SheetCard';
+import { SheetCard } from '@/components/sheets/SheetCard';
 import { Button } from '@/components/ui/button';
 import { Plus, BookOpen } from 'lucide-react';
 
@@ -50,7 +50,7 @@ export function SheetLibrary() {
           <div className="bg-primary p-1.5 rounded-md text-primary-foreground">
             <BookOpen className="size-5" />
           </div>
-          <h1 className="font-serif text-xl font-bold tracking-tight">Source Sheet Editor</h1>
+          <h1 className="font-serif text-xl font-bold tracking-tight">Mekorly</h1>
         </div>
         <Button onClick={handleCreateSheet} className="gap-2">
           <Plus className="size-4" />
