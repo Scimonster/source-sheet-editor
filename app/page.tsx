@@ -1,5 +1,5 @@
-import { EditorApp } from '@/components/editor/EditorApp';
+import { SheetLibrary } from '@/components/sheets/SheetLibrary';
 
 export default function Home() {
-  return <EditorApp />;
+  return <SheetLibrary />;
 }

@@ -10,7 +10,6 @@ import {
   DirectionElement,
   GlobalConfig,
 } from './types';
-import { seedSheet } from './seed-data';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -104,12 +103,42 @@ function countSourcesBefore(
   return count;
 }
 
+// ─── Blank sheet skeleton (used before a sheet is loaded) ────────────────────
+
+function blankSheet(): SourceSheet {
+  return {
+    id: '',
+    version: '1.0',
+    metadata: {
+      title: '',
+      subtitle: '',
+      header: { left: '', center: '', right: '' },
+      footer: { left: '', center: '', right: '', showPageNumbers: false },
+      authorId: '',
+      username: '',
+      visibility: 'private',
+      collaborators: [],
+    },
+    config: {
+      paperSize: 'A4',
+      margins: { top: 20, bottom: 20, left: 15, right: 15 },
+      defaultStyles: { fontFamily: 'Times New Roman', fontSize: '12pt', justification: 'justify' },
+      sectionNumbering: 'roman',
+      sourceNumbering: 'arabic',
+    },
+    content: [],
+  };
+}
+
 // ─── State ───────────────────────────────────────────────────────────────────
 
 interface SheetState {
   sheet: SourceSheet;
   viewMode: ViewMode;
   selectedId: string | null;
+
+  // Load a sheet from storage into the store
+  loadSheet: (sheet: SourceSheet) => void;
 
   // Metadata
   updateMetadata: (updates: Partial<SourceSheet['metadata']>) => void;
@@ -148,9 +177,11 @@ interface SheetState {
 export const useSheetStore = create<SheetState>()(
   temporal(
     (set, get) => ({
-      sheet: cloneNode(seedSheet),
+      sheet: blankSheet(),
       viewMode: 'edit',
       selectedId: null,
+
+      loadSheet: (sheet) => set({ sheet }),
 
       updateMetadata: (updates) =>
         set((s) => ({
