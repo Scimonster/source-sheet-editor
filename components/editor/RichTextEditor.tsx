@@ -1,12 +1,14 @@
 'use client';
 
 import { useEditor, EditorContent } from '@tiptap/react';
+import { mergeAttributes } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Superscript from '@tiptap/extension-superscript';
 import Subscript from '@tiptap/extension-subscript';
 import TextAlign from '@tiptap/extension-text-align';
 import Placeholder from '@tiptap/extension-placeholder';
+import Image from '@tiptap/extension-image';
 import { cn } from '@/lib/utils';
 import {
   Bold,
@@ -20,10 +22,81 @@ import {
   AlignJustify,
   Superscript as SuperscriptIcon,
   Subscript as SubscriptIcon,
+  ImagePlus,
 } from 'lucide-react';
 import { Toggle } from '@/components/ui/toggle';
 import { Separator } from '@/components/ui/separator';
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
+const MAX_IMAGE_UPLOAD_BYTES = 10 * 1024 * 1024;
+const IMAGE_READ_ERROR = 'The image file could not be read.';
+const IMAGE_SIZE_LIMIT_LABEL = '10MB';
+
+const normalizeImageFloat = (value: string | null | undefined): 'left' | 'right' | 'none' => {
+  if (value === 'left' || value === 'right') return value;
+  return 'none';
+};
+
+const normalizeImageWidth = (value: string | null | undefined): string => {
+  if (!value) return '100%';
+  const match = value.match(/\d{1,3}/);
+  if (!match) return '100%';
+  const parsed = Number.parseInt(match[0], 10);
+  if (!Number.isFinite(parsed)) return '100%';
+  return `${Math.min(Math.max(parsed, 10), 100)}%`;
+};
+
+const RichImage = Image.extend({
+  addAttributes() {
+    const parentAttributes = this.parent?.() ?? {};
+    return {
+      ...parentAttributes,
+      width: {
+        default: '100%',
+        parseHTML: (element) => {
+          const attrWidth = element.getAttribute('data-width');
+          if (attrWidth) return normalizeImageWidth(attrWidth);
+          const styleWidth = element.style.width?.trim();
+          return styleWidth?.endsWith('%') ? normalizeImageWidth(styleWidth) : '100%';
+        },
+      },
+      float: {
+        default: 'none',
+        parseHTML: (element) => normalizeImageFloat(element.getAttribute('data-float') ?? element.style.float),
+      },
+    };
+  },
+  renderHTML({ HTMLAttributes }) {
+    const { width, float, style, ...rest } = HTMLAttributes;
+    const safeWidth = normalizeImageWidth(typeof width === 'string' ? width : undefined);
+    const safeFloat = normalizeImageFloat(typeof float === 'string' ? float : undefined);
+    const existingStyle = typeof style === 'string' ? style : '';
+
+    const mergedStyles: string[] = ['max-width: 100%', 'height: auto'];
+    mergedStyles.push(`width: ${safeWidth}`);
+
+    if (safeFloat === 'left') {
+      mergedStyles.push('float: left', 'margin: 0.25rem 1rem 0.5rem 0');
+    } else if (safeFloat === 'right') {
+      mergedStyles.push('float: right', 'margin: 0.25rem 0 0.5rem 1rem');
+    } else {
+      mergedStyles.push('display: block', 'margin: 0.5rem auto');
+    }
+
+    if (existingStyle) {
+      mergedStyles.push(existingStyle);
+    }
+
+    return [
+      'img',
+      mergeAttributes(this.options.HTMLAttributes, rest, {
+        'data-width': safeWidth,
+        'data-float': safeFloat,
+        style: mergedStyles.join('; '),
+      }),
+    ];
+  },
+});
 
 interface Props {
   value: string;
@@ -45,6 +118,9 @@ export function RichTextEditor({
   minHeight = '3rem',
   showToolbar = true,
 }: Props) {
+  const imageUploadInputRef = useRef<HTMLInputElement>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -54,6 +130,7 @@ export function RichTextEditor({
       Subscript,
       TextAlign.configure({ types: ['paragraph'] }),
       Placeholder.configure({ placeholder }),
+      RichImage,
     ],
     content: value || '',
     onUpdate: ({ editor }) => {
@@ -82,6 +159,58 @@ export function RichTextEditor({
   }, [value]);
 
   if (!editor) return null;
+
+  const isImageSelected = editor.isActive('image');
+  const activeImageAttrs = editor.getAttributes('image') as { width?: string; float?: string };
+  const parsedWidth = Number.parseInt(normalizeImageWidth(activeImageAttrs?.width), 10);
+  const activeImageWidth = Number.isFinite(parsedWidth) ? Math.min(Math.max(parsedWidth, 10), 100) : 100;
+
+  const setImageFloat = (float: 'left' | 'right' | 'none') => {
+    editor.chain().focus().updateAttributes('image', { float }).run();
+  };
+
+  const onSelectImage = () => {
+    imageUploadInputRef.current?.click();
+  };
+
+  const onImageFileSelected = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setUploadError('Only image files can be uploaded.');
+      return;
+    }
+
+    if (file.size > MAX_IMAGE_UPLOAD_BYTES) {
+      setUploadError(`Image size exceeds the ${IMAGE_SIZE_LIMIT_LABEL} upload limit.`);
+      return;
+    }
+
+    setUploadError(null);
+
+    let dataUrl = '';
+    try {
+      dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error(IMAGE_READ_ERROR));
+        reader.readAsDataURL(file);
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : IMAGE_READ_ERROR;
+      setUploadError(message);
+      return;
+    }
+
+    editor
+      .chain()
+      .focus()
+      .setImage({ src: dataUrl, alt: file.name })
+      .updateAttributes('image', { width: '100%', float: 'none' })
+      .run();
+  };
 
   const ToolbarButton = ({
     active,
@@ -192,10 +321,69 @@ export function RichTextEditor({
           >
             <AlignJustify className="size-3.5" />
           </ToolbarButton>
+
+          <Separator orientation="vertical" className="h-5 mx-0.5" />
+
+          <ToolbarButton
+            onClick={onSelectImage}
+            label="Upload image"
+          >
+            <ImagePlus className="size-3.5" />
+          </ToolbarButton>
+          <ToolbarButton
+            active={isImageSelected && (activeImageAttrs.float ?? 'none') === 'none'}
+            onClick={() => setImageFloat('none')}
+            label="Center image (no text wrap)"
+          >
+            <AlignCenter className="size-3.5" />
+          </ToolbarButton>
+          <ToolbarButton
+            active={isImageSelected && activeImageAttrs.float === 'left'}
+            onClick={() => setImageFloat('left')}
+            label="Wrap text on the right of image"
+          >
+            <AlignLeft className="size-3.5" />
+          </ToolbarButton>
+          <ToolbarButton
+            active={isImageSelected && activeImageAttrs.float === 'right'}
+            onClick={() => setImageFloat('right')}
+            label="Wrap text on the left of image"
+          >
+            <AlignRight className="size-3.5" />
+          </ToolbarButton>
+          <input
+            ref={imageUploadInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={onImageFileSelected}
+          />
         </div>
       )}
       <div className="px-3 py-2">
         <EditorContent editor={editor} />
+        {showToolbar && isImageSelected && (
+          <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground" dir="ltr">
+            <span className="whitespace-nowrap">Image size</span>
+            <input
+              type="range"
+              min={10}
+              max={100}
+              step={5}
+              value={activeImageWidth}
+              onChange={(event) =>
+                editor.chain().focus().updateAttributes('image', { width: `${event.target.value}%` }).run()
+              }
+              className="h-2 w-36 accent-primary"
+            />
+            <span className="tabular-nums">{activeImageWidth}%</span>
+          </div>
+        )}
+        {showToolbar && uploadError && (
+          <p className="mt-2 text-xs text-destructive" dir="ltr">
+            {uploadError}
+          </p>
+        )}
       </div>
     </div>
   );

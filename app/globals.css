@@ -152,6 +152,31 @@
   outline: none;
 }
 
+.tiptap img {
+  max-width: 100%;
+  height: auto;
+}
+
+.tiptap img.ProseMirror-selectednode {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.prose img[data-float="left"] {
+  float: left;
+  margin: 0.25rem 1rem 0.5rem 0;
+}
+
+.prose img[data-float="right"] {
+  float: right;
+  margin: 0.25rem 0 0.5rem 1rem;
+}
+
+.prose img[data-float="none"] {
+  display: block;
+  margin: 0.5rem auto;
+}
+
 /* Print styles */
 @media print {
 
