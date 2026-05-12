@@ -81,7 +81,7 @@ export function SheetLibrary() {
                 Built for educators and laypeople alike.
               </p>
               <p className="text-md text-muted-foreground leading-relaxed max-w-2xl">
-                Coming soon: save to the cloud and collaborate on sheets with others.
+                Coming soon: Better mobile-friendly editing, save to the cloud, and collaborate on sheets with others.
               </p>
             </div>
           </div>
