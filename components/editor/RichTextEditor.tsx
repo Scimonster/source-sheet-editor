@@ -26,53 +26,72 @@ import {
 } from 'lucide-react';
 import { Toggle } from '@/components/ui/toggle';
 import { Separator } from '@/components/ui/separator';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const MAX_IMAGE_UPLOAD_BYTES = 10 * 1024 * 1024;
+const IMAGE_READ_ERROR = 'The image file could not be read.';
+const IMAGE_SIZE_LIMIT_LABEL = '10MB';
+
+const normalizeImageFloat = (value: string | null | undefined): 'left' | 'right' | 'none' => {
+  if (value === 'left' || value === 'right') return value;
+  return 'none';
+};
+
+const normalizeImageWidth = (value: string | null | undefined): string => {
+  if (!value) return '100%';
+  const match = value.match(/\d{1,3}/);
+  if (!match) return '100%';
+  const parsed = Number.parseInt(match[0], 10);
+  if (!Number.isFinite(parsed)) return '100%';
+  return `${Math.min(Math.max(parsed, 10), 100)}%`;
+};
 
 const RichImage = Image.extend({
   addAttributes() {
+    const parentAttributes = this.parent?.() ?? {};
     return {
-      ...this.parent?.(),
+      ...parentAttributes,
       width: {
         default: '100%',
-        parseHTML: (element) => element.getAttribute('data-width') ?? element.style.width ?? '100%',
+        parseHTML: (element) => {
+          const attrWidth = element.getAttribute('data-width');
+          if (attrWidth) return normalizeImageWidth(attrWidth);
+          const styleWidth = element.style.width?.trim();
+          return styleWidth?.endsWith('%') ? normalizeImageWidth(styleWidth) : '100%';
+        },
       },
       float: {
         default: 'none',
-        parseHTML: (element) => element.getAttribute('data-float') ?? element.style.float ?? 'none',
+        parseHTML: (element) => normalizeImageFloat(element.getAttribute('data-float') ?? element.style.float),
       },
     };
   },
   renderHTML({ HTMLAttributes }) {
-    const { width, float, style, ...rest } = HTMLAttributes as {
-      width?: string;
-      float?: string;
-      style?: string;
-    };
+    const { width, float, style, ...rest } = HTMLAttributes;
+    const safeWidth = normalizeImageWidth(typeof width === 'string' ? width : undefined);
+    const safeFloat = normalizeImageFloat(typeof float === 'string' ? float : undefined);
+    const existingStyle = typeof style === 'string' ? style : '';
 
     const mergedStyles: string[] = ['max-width: 100%', 'height: auto'];
-    if (width) {
-      mergedStyles.push(`width: ${width}`);
-    }
+    mergedStyles.push(`width: ${safeWidth}`);
 
-    if (float === 'left') {
+    if (safeFloat === 'left') {
       mergedStyles.push('float: left', 'margin: 0.25rem 1rem 0.5rem 0');
-    } else if (float === 'right') {
+    } else if (safeFloat === 'right') {
       mergedStyles.push('float: right', 'margin: 0.25rem 0 0.5rem 1rem');
     } else {
       mergedStyles.push('display: block', 'margin: 0.5rem auto');
     }
 
-    if (style) {
-      mergedStyles.push(style);
+    if (existingStyle) {
+      mergedStyles.push(existingStyle);
     }
 
     return [
       'img',
       mergeAttributes(this.options.HTMLAttributes, rest, {
-        'data-width': width,
-        'data-float': float ?? 'none',
+        'data-width': safeWidth,
+        'data-float': safeFloat,
         style: mergedStyles.join('; '),
       }),
     ];
@@ -100,6 +119,7 @@ export function RichTextEditor({
   showToolbar = true,
 }: Props) {
   const imageUploadInputRef = useRef<HTMLInputElement>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -142,7 +162,7 @@ export function RichTextEditor({
 
   const isImageSelected = editor.isActive('image');
   const activeImageAttrs = editor.getAttributes('image') as { width?: string; float?: string };
-  const parsedWidth = parseInt(activeImageAttrs?.width ?? '100', 10);
+  const parsedWidth = Number.parseInt(normalizeImageWidth(activeImageAttrs?.width), 10);
   const activeImageWidth = Number.isFinite(parsedWidth) ? Math.min(Math.max(parsedWidth, 10), 100) : 100;
 
   const setImageFloat = (float: 'left' | 'right' | 'none') => {
@@ -159,24 +179,28 @@ export function RichTextEditor({
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      window.alert('Only image files can be uploaded.');
+      setUploadError('Only image files can be uploaded.');
       return;
     }
 
     if (file.size > MAX_IMAGE_UPLOAD_BYTES) {
-      window.alert('Image upload is limited to 10MB.');
+      setUploadError(`Image size exceeds the ${IMAGE_SIZE_LIMIT_LABEL} upload limit.`);
       return;
     }
 
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = () => reject(new Error('Failed to read image'));
-      reader.readAsDataURL(file);
-    }).catch(() => '');
+    setUploadError(null);
 
-    if (!dataUrl) {
-      window.alert('Could not read image file.');
+    let dataUrl = '';
+    try {
+      dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error(IMAGE_READ_ERROR));
+        reader.readAsDataURL(file);
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : IMAGE_READ_ERROR;
+      setUploadError(message);
       return;
     }
 
@@ -309,7 +333,7 @@ export function RichTextEditor({
           <ToolbarButton
             active={isImageSelected && (activeImageAttrs.float ?? 'none') === 'none'}
             onClick={() => setImageFloat('none')}
-            label="Break text around image"
+            label="Center image (no text wrap)"
           >
             <AlignCenter className="size-3.5" />
           </ToolbarButton>
@@ -354,6 +378,11 @@ export function RichTextEditor({
             />
             <span className="tabular-nums">{activeImageWidth}%</span>
           </div>
+        )}
+        {showToolbar && uploadError && (
+          <p className="mt-2 text-xs text-destructive" dir="ltr">
+            {uploadError}
+          </p>
         )}
       </div>
     </div>
