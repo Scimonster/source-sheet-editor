@@ -164,6 +164,9 @@ importers:
       embla-carousel-react:
         specifier: 8.6.0
         version: 8.6.0(react@19.2.4)
+      gematriya:
+        specifier: ^2.0.0
+        version: 2.0.0
       input-otp:
         specifier: 1.4.2
         version: 1.4.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -216,6 +219,9 @@ importers:
       '@tailwindcss/postcss':
         specifier: ^4.2.0
         version: 4.2.0
+      '@types/gematriya':
+        specifier: ^2.0.5
+        version: 2.0.5
       '@types/node':
         specifier: ^22
         version: 22.19.11
@@ -1474,6 +1480,9 @@ packages:
   '@types/d3-timer@3.0.2':
     resolution: {integrity: sha512-Ps3T8E8dZDam6fUyNiMkekK3XUsaUEik+idO9/YjPtfj2qruF8tFBXS7XhtE4iIXBLxhmLjP3SXpLhVf21I9Lw==}
 
+  '@types/gematriya@2.0.5':
+    resolution: {integrity: sha512-3VlwhbERQisWZd+bU0TtE5n2dDLXsue8eUytTCkDi1QSwMEpmwsX5waCJt3OQbh8w/J/blUFbgHaRBpi0IvsNg==}
+
   '@types/node@22.19.11':
     resolution: {integrity: sha512-BH7YwL6rA93ReqeQS1c4bsPpcfOmJasG+Fkr6Y59q83f9M1WcBRHR2vM+P9eOisYRcN3ujQoiZY8uk5W+1WL8w==}
 
@@ -1652,6 +1661,9 @@ packages:
 
   fraction.js@5.3.4:
     resolution: {integrity: sha512-1X1NTtiJphryn/uLQz3whtY6jK3fTqoE3ohKs0tT+Ujr1W59oopxmoEh7Lu5p6vBaPbgoM0bzveAW4Qi5RyWDQ==}
+
+  gematriya@2.0.0:
+    resolution: {integrity: sha512-i+G3iGTn/vmojZkvS0dDPcw46tREqS10mztDOVoG6AACZzqp0eOpvIYaAOqZEiH4ee0Rkgt1Sf6jWM1GobJIeg==}
 
   get-nonce@1.0.1:
     resolution: {integrity: sha512-FJhYRoDaiatfEkUK8HKlicmu/3SGFD51q3itKDGoSTysQJBnfOcxU5GxnhE1E6soB76MbT0MBtnKJuXyAx+96Q==}
@@ -3269,6 +3281,8 @@ snapshots:
 
   '@types/d3-timer@3.0.2': {}
 
+  '@types/gematriya@2.0.5': {}
+
   '@types/node@22.19.11':
     dependencies:
       undici-types: 6.21.0
@@ -3414,6 +3428,8 @@ snapshots:
   fast-equals@5.4.0: {}
 
   fraction.js@5.3.4: {}
+
+  gematriya@2.0.0: {}
 
   get-nonce@1.0.1: {}
 
