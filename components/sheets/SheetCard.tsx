@@ -87,7 +87,7 @@ export function SheetCard({ sheet, onDelete, onRename }: SheetCardProps) {
           </DropdownMenuContent>
         </DropdownMenu>
       </CardHeader>
-      <CardContent className="p-4 pt-0" onClick={handleOpen} className="cursor-pointer">
+      <CardContent className="p-4 pt-0 cursor-pointer" onClick={handleOpen}>
         <div className="flex items-center text-xs text-muted-foreground gap-1.5 mt-2">
           <Calendar className="size-3" />
           <span>Updated {formatDistanceToNow(new Date(sheet.updatedAt), { addSuffix: true })}</span>

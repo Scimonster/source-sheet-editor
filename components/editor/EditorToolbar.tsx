@@ -17,11 +17,13 @@ import {
   BookOpen,
   Printer,
   Settings2,
+  ChevronLeft,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { GlobalSettingsDialog } from './GlobalSettingsDialog';
 import { AddElementButtons } from './AddElementButtons';
 import { useState } from 'react';
+import Link from 'next/link';
 
 export function EditorToolbar() {
   const { viewMode, setViewMode, sheet } = useSheetStore();
@@ -37,6 +39,22 @@ export function EditorToolbar() {
   return (
     <TooltipProvider delayDuration={300}>
       <header className="h-12 bg-primary text-primary-foreground border-b border-primary/80 flex items-center px-4 gap-3 shrink-0 print:hidden">
+        {/* Back to library */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Link
+              href="/"
+              className="flex items-center text-primary-foreground/70 hover:text-primary-foreground transition-colors shrink-0"
+              aria-label="Back to sheets"
+            >
+              <ChevronLeft className="size-5" />
+            </Link>
+          </TooltipTrigger>
+          <TooltipContent>All Sheets</TooltipContent>
+        </Tooltip>
+
+        <div className="w-px h-5 bg-white/20 shrink-0" />
+
         {/* Title */}
         <div className="flex-1 min-w-0 flex items-baseline gap-2">
           <span className="font-serif text-base font-semibold text-primary-foreground truncate leading-tight">
