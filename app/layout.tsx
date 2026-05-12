@@ -9,7 +9,7 @@ const _crimson = Crimson_Text({ subsets: ['latin'], weight: ['400', '600'], styl
 const _geistMono = Geist_Mono({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Source Sheet Editor',
+  title: 'Mekorly - Build Source Sheets for Jewish Texts',
   description: 'Build beautiful source sheets for shiurim and chaburot',
   generator: 'v0.app',
   icons: {
@@ -54,6 +54,9 @@ export default function RootLayout({
             </Link>
             <Link href="/privacy" className="hover:text-foreground underline underline-offset-4">
               Privacy Policy
+            </Link>
+            <Link href="https://github.com/Scimonster/source-sheet-editor" className="hover:text-foreground underline underline-offset-4">
+              GitHub
             </Link>
           </div>
         </footer>

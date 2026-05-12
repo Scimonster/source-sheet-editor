@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { storageAdapter, createBlankSheet, SheetMeta } from '@/lib/storage';
 import { SheetCard } from '@/components/sheets/SheetCard';
 import { Button } from '@/components/ui/button';
-import { Plus, BookOpen } from 'lucide-react';
+import { Plus, BookOpen, Sparkles } from 'lucide-react';
 
 export function SheetLibrary() {
   const [sheets, setSheets] = useState<SheetMeta[]>([]);
@@ -59,6 +59,33 @@ export function SheetLibrary() {
       </header>
 
       <main className="max-w-5xl mx-auto p-8">
+        <div className="relative overflow-hidden rounded-3xl bg-white dark:bg-card border border-border p-8 mb-12 shadow-lg group transition-all hover:shadow-xl">
+          <div className="absolute top-0 right-0 -mr-16 -mt-16 size-64 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-colors duration-700" />
+          <div className="relative z-10 flex flex-col md:flex-row gap-8 items-start md:items-center">
+            <div className="bg-primary/20 p-4 rounded-2xl text-primary shrink-0 ring-8 ring-primary/5">
+              <Sparkles className="size-8" />
+            </div>
+            <div>
+              {/* <div className="flex items-center gap-3 mb-2">
+                <span className="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider">
+                  New Version
+                </span>
+                <span className="text-muted-foreground text-sm font-medium">v1.2.0</span>
+              </div> */}
+              <h2 className="text-3xl font-serif font-bold tracking-tight mb-3 bg-linear-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                Welcome to Mekorly
+              </h2>
+              <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
+                The source sheet editor you didn't know you needed. Easily create beautiful and practical source sheets for Jewish texts.
+                Automatically add sources from Sefaria or manually. Leave yourself leader notes which don't show in the distribution copy.
+                Built for educators and laypeople alike.
+              </p>
+              <p className="text-md text-muted-foreground leading-relaxed max-w-2xl">
+                Coming soon: save to the cloud and collaborate on sheets with others.
+              </p>
+            </div>
+          </div>
+        </div>
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-2xl font-serif font-semibold">Your Sheets</h2>
