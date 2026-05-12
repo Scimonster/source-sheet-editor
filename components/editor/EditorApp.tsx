@@ -32,11 +32,13 @@ export function EditorApp({ sheetId }: EditorAppProps) {
     return () => { cancelled = true; };
   }, [sheetId, loadSheet]);
 
-  // Autosave: subscribe to store changes and debounce saves
+  // Autosave: subscribe to store changes and debounce saves.
+  // Skip saving when sheet.id is empty — that indicates the blank skeleton
+  // before the real sheet has been loaded from storage.
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     const unsubscribe = useSheetStore.subscribe((state) => {
-      if (!state.sheet.id) return; // don't save blank skeleton
+      if (!state.sheet.id) return;
       if (saveTimer.current) clearTimeout(saveTimer.current);
       saveTimer.current = setTimeout(() => {
         storageAdapter.saveSheet(state.sheet);
@@ -44,7 +46,10 @@ export function EditorApp({ sheetId }: EditorAppProps) {
     });
     return () => {
       unsubscribe();
-      if (saveTimer.current) clearTimeout(saveTimer.current);
+      if (saveTimer.current) {
+        clearTimeout(saveTimer.current);
+        saveTimer.current = null;
+      }
     };
   }, []);
 
