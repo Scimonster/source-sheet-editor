@@ -1,12 +1,14 @@
 'use client';
 
 import { useEditor, EditorContent } from '@tiptap/react';
+import { mergeAttributes } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Superscript from '@tiptap/extension-superscript';
 import Subscript from '@tiptap/extension-subscript';
 import TextAlign from '@tiptap/extension-text-align';
 import Placeholder from '@tiptap/extension-placeholder';
+import Image from '@tiptap/extension-image';
 import { cn } from '@/lib/utils';
 import {
   Bold,
@@ -20,10 +22,62 @@ import {
   AlignJustify,
   Superscript as SuperscriptIcon,
   Subscript as SubscriptIcon,
+  ImagePlus,
 } from 'lucide-react';
 import { Toggle } from '@/components/ui/toggle';
 import { Separator } from '@/components/ui/separator';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+
+const MAX_IMAGE_UPLOAD_BYTES = 10 * 1024 * 1024;
+
+const RichImage = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      width: {
+        default: '100%',
+        parseHTML: (element) => element.getAttribute('data-width') ?? element.style.width ?? '100%',
+      },
+      float: {
+        default: 'none',
+        parseHTML: (element) => element.getAttribute('data-float') ?? element.style.float ?? 'none',
+      },
+    };
+  },
+  renderHTML({ HTMLAttributes }) {
+    const { width, float, style, ...rest } = HTMLAttributes as {
+      width?: string;
+      float?: string;
+      style?: string;
+    };
+
+    const mergedStyles: string[] = ['max-width: 100%', 'height: auto'];
+    if (width) {
+      mergedStyles.push(`width: ${width}`);
+    }
+
+    if (float === 'left') {
+      mergedStyles.push('float: left', 'margin: 0.25rem 1rem 0.5rem 0');
+    } else if (float === 'right') {
+      mergedStyles.push('float: right', 'margin: 0.25rem 0 0.5rem 1rem');
+    } else {
+      mergedStyles.push('display: block', 'margin: 0.5rem auto');
+    }
+
+    if (style) {
+      mergedStyles.push(style);
+    }
+
+    return [
+      'img',
+      mergeAttributes(this.options.HTMLAttributes, rest, {
+        'data-width': width,
+        'data-float': float ?? 'none',
+        style: mergedStyles.join('; '),
+      }),
+    ];
+  },
+});
 
 interface Props {
   value: string;
@@ -45,6 +99,8 @@ export function RichTextEditor({
   minHeight = '3rem',
   showToolbar = true,
 }: Props) {
+  const imageUploadInputRef = useRef<HTMLInputElement>(null);
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -54,6 +110,7 @@ export function RichTextEditor({
       Subscript,
       TextAlign.configure({ types: ['paragraph'] }),
       Placeholder.configure({ placeholder }),
+      RichImage,
     ],
     content: value || '',
     onUpdate: ({ editor }) => {
@@ -82,6 +139,54 @@ export function RichTextEditor({
   }, [value]);
 
   if (!editor) return null;
+
+  const isImageSelected = editor.isActive('image');
+  const activeImageAttrs = editor.getAttributes('image') as { width?: string; float?: string };
+  const parsedWidth = parseInt(activeImageAttrs?.width ?? '100', 10);
+  const activeImageWidth = Number.isFinite(parsedWidth) ? Math.min(Math.max(parsedWidth, 10), 100) : 100;
+
+  const setImageFloat = (float: 'left' | 'right' | 'none') => {
+    editor.chain().focus().updateAttributes('image', { float }).run();
+  };
+
+  const onSelectImage = () => {
+    imageUploadInputRef.current?.click();
+  };
+
+  const onImageFileSelected = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      window.alert('Only image files can be uploaded.');
+      return;
+    }
+
+    if (file.size > MAX_IMAGE_UPLOAD_BYTES) {
+      window.alert('Image upload is limited to 10MB.');
+      return;
+    }
+
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error('Failed to read image'));
+      reader.readAsDataURL(file);
+    }).catch(() => '');
+
+    if (!dataUrl) {
+      window.alert('Could not read image file.');
+      return;
+    }
+
+    editor
+      .chain()
+      .focus()
+      .setImage({ src: dataUrl, alt: file.name })
+      .updateAttributes('image', { width: '100%', float: 'none' })
+      .run();
+  };
 
   const ToolbarButton = ({
     active,
@@ -192,10 +297,64 @@ export function RichTextEditor({
           >
             <AlignJustify className="size-3.5" />
           </ToolbarButton>
+
+          <Separator orientation="vertical" className="h-5 mx-0.5" />
+
+          <ToolbarButton
+            onClick={onSelectImage}
+            label="Upload image"
+          >
+            <ImagePlus className="size-3.5" />
+          </ToolbarButton>
+          <ToolbarButton
+            active={isImageSelected && (activeImageAttrs.float ?? 'none') === 'none'}
+            onClick={() => setImageFloat('none')}
+            label="Break text around image"
+          >
+            <AlignCenter className="size-3.5" />
+          </ToolbarButton>
+          <ToolbarButton
+            active={isImageSelected && activeImageAttrs.float === 'left'}
+            onClick={() => setImageFloat('left')}
+            label="Wrap text on the right of image"
+          >
+            <AlignLeft className="size-3.5" />
+          </ToolbarButton>
+          <ToolbarButton
+            active={isImageSelected && activeImageAttrs.float === 'right'}
+            onClick={() => setImageFloat('right')}
+            label="Wrap text on the left of image"
+          >
+            <AlignRight className="size-3.5" />
+          </ToolbarButton>
+          <input
+            ref={imageUploadInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={onImageFileSelected}
+          />
         </div>
       )}
       <div className="px-3 py-2">
         <EditorContent editor={editor} />
+        {showToolbar && isImageSelected && (
+          <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground" dir="ltr">
+            <span className="whitespace-nowrap">Image size</span>
+            <input
+              type="range"
+              min={10}
+              max={100}
+              step={5}
+              value={activeImageWidth}
+              onChange={(event) =>
+                editor.chain().focus().updateAttributes('image', { width: `${event.target.value}%` }).run()
+              }
+              className="h-2 w-36 accent-primary"
+            />
+            <span className="tabular-nums">{activeImageWidth}%</span>
+          </div>
+        )}
       </div>
     </div>
   );
