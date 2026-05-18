@@ -384,7 +384,7 @@ export function newDirectionElement(): DirectionElement {
     content: '',
     displayMode: {
       italics: true,
-      indent: true,
+      indent: false,
       border: true,
       brackets: false,
       small: false,

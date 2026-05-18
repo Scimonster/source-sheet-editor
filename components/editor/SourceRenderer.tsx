@@ -163,7 +163,7 @@ export function SourceRenderer({ source, ancestorSections }: Props) {
   const dirDisplay = directionNote && directionNote.trim() && directionNote !== '<p></p>' && (
     (viewMode === 'edit' || viewMode === 'leader') && (
       <div
-        className="text-sm italic text-muted-foreground border-l-2 border-amber-400 pl-3 mb-2 direction-note"
+        className="text-sm italic text-muted-foreground border-l-2 border-amber-400 print:border-neutral-400 pl-3 mb-2 direction-note"
         dangerouslySetInnerHTML={{ __html: directionNote }}
       />
     )

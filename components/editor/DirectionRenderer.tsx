@@ -40,12 +40,13 @@ export function DirectionRenderer({ direction }: Props) {
   const wrapperClass = cn(
     'direction-element py-1',
     // Use CSS custom properties for the warm amber/tawny tones
-    '[color:oklch(0.45_0.09_56)]',
+    '[color:oklch(0.45_0.09_56)] print:[color:#262626]',
     dm.italics && 'italic',
     dm.indent && 'ml-5',
-    dm.border && 'border-l-4 pl-3 [border-color:oklch(0.72_0.12_76)]',
+    dm.border && 'border-l-4 pl-3 [border-color:oklch(0.72_0.12_76)] print:[border-color:#737373]',
     dm.small && 'text-xs',
-    isLeader && 'rounded px-2 py-1 [background:oklch(0.972_0.032_82)]'
+    isLeader && 'rounded py-1 [background:oklch(0.972_0.032_82)] print:bg-transparent print:rounded-none',
+    isLeader && (dm.border ? 'pr-2 print:pr-0' : 'px-2 print:px-0')
   );
 
   if (isEdit && isEditing) {

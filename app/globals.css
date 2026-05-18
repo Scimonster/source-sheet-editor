@@ -201,8 +201,21 @@
   }
 
   /* Direction notes hidden in standard print (shown only in leader view) */
-  .direction-element {
+  main:not([data-view-mode="leader"]) .direction-element,
+  main:not([data-view-mode="leader"]) .direction-note {
     display: none !important;
+  }
+
+  main[data-view-mode="leader"] .direction-element,
+  main[data-view-mode="leader"] .direction-element *,
+  main[data-view-mode="leader"] .direction-note,
+  main[data-view-mode="leader"] .direction-note * {
+    color: #262626 !important;
+  }
+
+  main[data-view-mode="leader"] .direction-element.has-border,
+  main[data-view-mode="leader"] .direction-note {
+    border-color: #737373 !important;
   }
 
   /* Ensure Hebrew text prints RTL */

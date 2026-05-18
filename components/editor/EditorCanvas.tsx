@@ -101,6 +101,7 @@ export function EditorCanvas() {
       )}
 
       <main
+        data-view-mode={viewMode}
         className={cn(
           'flex-1 overflow-auto bg-background py-8',
           viewMode === 'preview' && 'bg-muted/30'
