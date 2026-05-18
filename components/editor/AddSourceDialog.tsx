@@ -173,8 +173,8 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({ onAdd, onClose
       type: 'source',
       ref: { en: enData.ref, he: heData.heRef, link: `https://www.sefaria.org/${enData.ref}` },
       content: {
-        he: { text: processText(heData, true, false), license: { name: heData.versions[0].license } },
-        en: { text: processText(enData, false, false), license: { name: enData.versions[0].license } }
+        he: { text: processText(heData, true, false), license: { name: heData.versions[0]?.license } },
+        en: { text: processText(enData, false, false), license: { name: enData.versions[0]?.license } }
       },
       displayOptions: { layout: 'side-by-side', primaryLanguage: 'he' }
     });
@@ -294,11 +294,11 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({ onAdd, onClose
         <div className="flex flex-wrap items-center gap-6 border-b bg-background p-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-foreground">Hebrew:</span>
-            <ToggleGroup 
+            <ToggleGroup
               type="single"
               variant="outline"
               size="sm"
-              value={hebrewDisplay} 
+              value={hebrewDisplay}
               onValueChange={(v: any) => v && setHebrewDisplay(v)}
               className="ml-1"
             >
@@ -359,10 +359,10 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({ onAdd, onClose
             </>
           )}
 
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="ml-auto h-8 text-xs" 
+          <Button
+            variant="ghost"
+            size="sm"
+            className="ml-auto h-8 text-xs"
             onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
           >
             {showAdvancedOptions ? 'Hide Advanced Options' : 'Show Advanced Options'}
