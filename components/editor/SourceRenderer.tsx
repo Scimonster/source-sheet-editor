@@ -116,10 +116,7 @@ export function SourceRenderer({ source, ancestorSections }: Props) {
   const showEnRef = titleLangs === 'both' || titleLangs === 'en';
 
   const refStyle: React.CSSProperties = {
-    justifyContent: resolvedTitle.justification === 'center' ? 'center'
-      : resolvedTitle.justification === 'right' ? 'flex-end'
-      : resolvedTitle.justification === 'left' ? 'flex-start'
-      : undefined,
+    justifyContent: resolvedTitle.justification,
     fontFamily: resolvedTitle.fontFamily ?? resolvedTitleStyles.fontFamily,
     fontSize: resolvedTitle.fontSize ?? resolvedTitleStyles.fontSize,
   };
@@ -128,6 +125,7 @@ export function SourceRenderer({ source, ancestorSections }: Props) {
     <div
       className="flex flex-wrap items-center gap-2 mb-3 pb-1.5 border-b border-border/60"
       style={refStyle}
+      dir={titleLangs === 'en' || (titleLangs === 'both' && resolvedTitle.justification === 'left') ? 'ltr' : 'rtl'}
     >
       {formattedNum && (
         <span className="text-xs font-semibold text-muted-foreground bg-muted rounded px-1.5 py-0.5 font-sans tabular-nums">
@@ -152,6 +150,7 @@ export function SourceRenderer({ source, ancestorSections }: Props) {
             'font-serif text-sm text-muted-foreground',
             hasLink && 'text-accent underline-offset-2 underline cursor-pointer hover:opacity-80'
           )}
+          dir="ltr"
           onClick={hasLink ? () => window.open(ref.link, '_blank') : undefined}
         >
           {refEn}
