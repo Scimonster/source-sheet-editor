@@ -172,7 +172,7 @@ export function SourceRenderer({ source, ancestorSections }: Props) {
 
   const layout = resolvedDisplay.layout;
   const primary = resolvedDisplay.primaryLanguage;
-  const primaryRatioPct = parseInt(resolvedDisplay.columnRatio ?? '50') || 50;
+  const primaryRatioPct = parseInt(resolvedDisplay.columnRatio ?? '40') || 40;
   const secondaryRatioPct = 100 - primaryRatioPct;
 
   const heStyle: React.CSSProperties = {

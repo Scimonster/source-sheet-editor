@@ -125,6 +125,8 @@ function blankSheet(): SourceSheet {
       defaultStyles: { fontFamily: 'Times New Roman', fontSize: '12pt', justification: 'justify' },
       sectionNumbering: 'roman',
       sourceNumbering: 'arabic',
+      sourceDefaults: { layout: 'side-by-side', primaryLanguage: 'he', columnRatio: '40%' },
+      titleDefaults: { languages: 'both', justification: 'left' },
     },
     content: [],
   };
@@ -362,7 +364,7 @@ export function newSourceElement(): SourceElement {
     displayOptions: {
       layout: 'side-by-side',
       primaryLanguage: 'he',
-      columnRatio: '50%',
+      columnRatio: '40%',
     },
   };
 }

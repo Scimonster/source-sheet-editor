@@ -246,6 +246,34 @@ export function SectionConfigDialog({ section, open, onOpenChange }: Props) {
                   </SelectContent>
                 </Select>
               </div>
+              {(section.sourceDefaults?.layout === 'side-by-side' || section.sourceDefaults?.layout === undefined) && (
+                <div className="space-y-1 col-span-2">
+                  <Label className="text-xs">Column ratio (primary language width)</Label>
+                  <Select
+                    value={section.sourceDefaults?.columnRatio ?? 'inherit'}
+                    onValueChange={(v) =>
+                      updateElement(section.id, {
+                        sourceDefaults: {
+                          ...section.sourceDefaults,
+                          columnRatio: v === 'inherit' ? undefined : v,
+                        },
+                      })
+                    }
+                  >
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue placeholder="Inherit" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="inherit">Inherit from sheet</SelectItem>
+                      <SelectItem value="33%">33% / 67%</SelectItem>
+                      <SelectItem value="40%">40% / 60%</SelectItem>
+                      <SelectItem value="50%">50% / 50%</SelectItem>
+                      <SelectItem value="60%">60% / 40%</SelectItem>
+                      <SelectItem value="67%">67% / 33%</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
 
             <Separator />

@@ -147,7 +147,7 @@ export function resolveSourceDisplayOptions(
   const hardDefaults: Required<SourceDisplayOptions> = {
     layout: 'side-by-side',
     primaryLanguage: 'he',
-    columnRatio: '50%',
+    columnRatio: '40%',
   };
 
   // 1-2. Global defaults

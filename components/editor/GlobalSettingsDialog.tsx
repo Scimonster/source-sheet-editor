@@ -415,6 +415,87 @@ export function GlobalSettingsDialog({ open, onOpenChange }: Props) {
                   </SelectContent>
                 </Select>
               </div>
+              {(config.sourceDefaults?.layout === 'side-by-side' || config.sourceDefaults?.layout === undefined) && (
+                <div className="space-y-1 col-span-2">
+                  <Label className="text-xs">Column ratio (primary language width)</Label>
+                  <Select
+                    value={config.sourceDefaults?.columnRatio ?? '40%'}
+                    onValueChange={(v) =>
+                      updateConfig({
+                        sourceDefaults: {
+                          ...config.sourceDefaults,
+                          columnRatio: v,
+                        },
+                      })
+                    }
+                  >
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="33%">33% / 67%</SelectItem>
+                      <SelectItem value="40%">40% / 60%</SelectItem>
+                      <SelectItem value="50%">50% / 50%</SelectItem>
+                      <SelectItem value="60%">60% / 40%</SelectItem>
+                      <SelectItem value="67%">67% / 33%</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+            <Separator />
+
+            {/* Title Defaults */}
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+              Default Title Display
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Languages</Label>
+                <Select
+                  value={config.titleDefaults?.languages ?? 'both'}
+                  onValueChange={(v) =>
+                    updateConfig({
+                      titleDefaults: {
+                        ...config.titleDefaults,
+                        languages: v as 'both' | 'he' | 'en',
+                      },
+                    })
+                  }
+                >
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="both">Both</SelectItem>
+                    <SelectItem value="he">Hebrew only</SelectItem>
+                    <SelectItem value="en">English only</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Alignment</Label>
+                <Select
+                  value={config.titleDefaults?.justification ?? 'left'}
+                  onValueChange={(v) =>
+                    updateConfig({
+                      titleDefaults: {
+                        ...config.titleDefaults,
+                        justification: v as 'left' | 'center' | 'right',
+                      },
+                    })
+                  }
+                >
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="left">Left</SelectItem>
+                    <SelectItem value="center">Center</SelectItem>
+                    <SelectItem value="right">Right</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </TabsContent>
 

@@ -176,7 +176,7 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({ onAdd, onClose
         he: { text: processText(heData, true, false), license: { name: heData.versions[0]?.license } },
         en: { text: processText(enData, false, false), license: { name: enData.versions[0]?.license } }
       },
-      displayOptions: { layout: 'side-by-side', primaryLanguage: 'he' }
+      displayOptions: {}
     });
     onClose();
   };

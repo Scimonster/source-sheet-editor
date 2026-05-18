@@ -140,7 +140,9 @@ export function SourceConfigDialog({ source, open, onOpenChange }: Props) {
                     <SelectContent>
                       <SelectItem value="inherit">Inherit</SelectItem>
                       <SelectItem value="33%">33% / 67%</SelectItem>
+                      <SelectItem value="40%">40% / 60%</SelectItem>
                       <SelectItem value="50%">50% / 50%</SelectItem>
+                      <SelectItem value="60%">60% / 40%</SelectItem>
                       <SelectItem value="67%">67% / 33%</SelectItem>
                     </SelectContent>
                   </Select>
@@ -158,20 +160,21 @@ export function SourceConfigDialog({ source, open, onOpenChange }: Props) {
               <div className="space-y-1">
                 <Label>Languages</Label>
                 <Select
-                  value={source.titleDisplay?.languages ?? 'both'}
+                  value={source.titleDisplay?.languages ?? 'inherit'}
                   onValueChange={(v) =>
                     update({
                       titleDisplay: {
-                        ...(source.titleDisplay ?? { languages: 'both' }),
-                        languages: v as 'both' | 'he' | 'en',
+                        ...(source.titleDisplay ?? {}),
+                        languages: v === 'inherit' ? undefined : (v as 'both' | 'he' | 'en'),
                       },
                     })
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Inherit" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="inherit">Inherit</SelectItem>
                     <SelectItem value="both">Both</SelectItem>
                     <SelectItem value="he">Hebrew only</SelectItem>
                     <SelectItem value="en">English only</SelectItem>
