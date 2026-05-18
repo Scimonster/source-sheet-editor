@@ -123,7 +123,7 @@ export function SourceRenderer({ source, ancestorSections }: Props) {
 
   const refDisplay = (
     <div
-      className="flex flex-wrap items-center gap-2 mb-3 pb-1.5 border-b border-border/60"
+      className="flex flex-wrap items-center gap-2 mb-3 pb-1.5 border-b border-border/60 source-header"
       style={refStyle}
       dir={titleLangs === 'en' || (titleLangs === 'both' && resolvedTitle.justification === 'left') ? 'ltr' : 'rtl'}
     >
