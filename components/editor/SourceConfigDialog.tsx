@@ -1,5 +1,6 @@
 'use client';
 
+import { startTransition } from 'react';
 import { SourceElement } from '@/lib/types';
 import { useSheetStore } from '@/lib/store';
 import {
@@ -266,7 +267,7 @@ export function SourceConfigDialog({ source, open, onOpenChange }: Props) {
             <h3 className="text-sm font-semibold">Direction note (leader only)</h3>
             <RichTextEditor
               value={directionNote ?? ''}
-              onChange={(html) => update({ directionNote: html })}
+              onChange={(html) => startTransition(() => update({ directionNote: html }))}
               placeholder="Add a note for the chaburah leader…"
               minHeight="3rem"
             />
