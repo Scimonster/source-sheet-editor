@@ -1,5 +1,6 @@
 'use client';
 
+import { startTransition } from 'react';
 import { Section, ElementStyles, SectionStyleOverrides } from '@/lib/types';
 import { useSheetStore } from '@/lib/store';
 import {
@@ -116,7 +117,10 @@ function StyleOverrideRow({
 }
 
 export function SectionConfigDialog({ section, open, onOpenChange }: Props) {
-  const { updateElement } = useSheetStore();
+  const { updateElement: storeUpdateElement } = useSheetStore();
+  const updateElement = (id: string, partial: any) => {
+    startTransition(() => storeUpdateElement(id, partial));
+  };
 
   const handleOverrideChange = (key: string, styles: Partial<ElementStyles>) => {
     const current = section.styleOverrides ?? {};

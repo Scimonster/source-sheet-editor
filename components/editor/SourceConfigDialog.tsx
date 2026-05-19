@@ -32,7 +32,7 @@ export function SourceConfigDialog({ source, open, onOpenChange }: Props) {
   const { ref, displayOptions, directionNote } = source;
 
   const update = (partial: Partial<SourceElement>) =>
-    updateElement(source.id, partial);
+    startTransition(() => updateElement(source.id, partial));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

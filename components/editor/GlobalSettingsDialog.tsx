@@ -1,5 +1,6 @@
 'use client';
 
+import { startTransition } from 'react';
 import { useSheetStore } from '@/lib/store';
 import { ElementStyles } from '@/lib/types';
 import {
@@ -128,7 +129,9 @@ function ClassStyleRow({
 }
 
 export function GlobalSettingsDialog({ open, onOpenChange }: Props) {
-  const { sheet, updateMetadata, updateConfig } = useSheetStore();
+  const { sheet, updateMetadata: storeUpdateMetadata, updateConfig: storeUpdateConfig } = useSheetStore();
+  const updateMetadata = (partial: any) => startTransition(() => storeUpdateMetadata(partial));
+  const updateConfig = (partial: any) => startTransition(() => storeUpdateConfig(partial));
   const { metadata, config } = sheet;
 
   const handleClassChange = (classKey: string, styles: Partial<ElementStyles>) => {

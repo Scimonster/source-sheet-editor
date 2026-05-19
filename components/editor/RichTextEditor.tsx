@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { Toggle } from '@/components/ui/toggle';
 import { Separator } from '@/components/ui/separator';
-import { useEffect } from 'react';
+import { useEffect, useRef, startTransition } from 'react';
 
 interface Props {
   value: string;
@@ -45,6 +45,18 @@ export function RichTextEditor({
   minHeight = '3rem',
   showToolbar = true,
 }: Props) {
+  const lastEmittedValueRef = useRef<string>(value || '');
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -57,7 +69,29 @@ export function RichTextEditor({
     ],
     content: value || '',
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
+      const html = editor.getHTML();
+      lastEmittedValueRef.current = html;
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+      debounceTimeoutRef.current = setTimeout(() => {
+        startTransition(() => {
+          onChange(html);
+        });
+      }, 300);
+    },
+    onBlur: ({ editor }) => {
+      const html = editor.getHTML();
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+        debounceTimeoutRef.current = null;
+      }
+      if (lastEmittedValueRef.current !== html || value !== html) {
+        lastEmittedValueRef.current = html;
+        startTransition(() => {
+          onChange(html);
+        });
+      }
     },
     editorProps: {
       attributes: {
@@ -75,8 +109,10 @@ export function RichTextEditor({
   // Sync external changes (e.g. load from store)
   useEffect(() => {
     if (!editor) return;
+    if (value === lastEmittedValueRef.current) return;
     if (editor.getHTML() !== value) {
       editor.commands.setContent(value || '');
+      lastEmittedValueRef.current = value || '';
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
