@@ -38,7 +38,7 @@ export function EditorToolbar() {
 
   return (
     <TooltipProvider delayDuration={300}>
-      <header className="h-12 bg-primary text-primary-foreground border-b border-primary/80 flex items-center px-4 gap-3 shrink-0 print:hidden">
+      <header className="sticky top-0 z-30 h-12 bg-primary text-primary-foreground border-b border-primary/80 flex items-center px-4 gap-3 shrink-0 print:hidden">
         {/* Back to library */}
         <Tooltip>
           <TooltipTrigger asChild>
